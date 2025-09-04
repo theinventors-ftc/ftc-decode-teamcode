@@ -5,7 +5,6 @@ import static org.firstinspires.ftc.teamcode.PurePursuit.Base.Math.MathFunction.
 
 import static java.lang.Math.abs;
 
-import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.teamcode.Controllers.PIDFEx;
@@ -177,7 +176,7 @@ public class RobotMovement {
             followPoint.setTheta(theta);
 
             motorsPower = goToPoint(followPoint, currentPose, realTranslationalEndDistance, realThetaEndDistance);
-            fieldCentricMovement(turnToRobotCentric(motorsPower, currentPose));
+            robotCentricMovement(turnToRobotCentric(motorsPower, currentPose));
         }
     }
 
@@ -330,7 +329,7 @@ public class RobotMovement {
     }
 
     /*-- Movement --*/
-    public void fieldCentricMovement (Pose pose) {
+    public void robotCentricMovement (Pose pose) {
         // Parallel encoder motion Y Axis
         // Perpendicular encoder motion X Axis
         // Rotational IMU motion Theta

@@ -40,7 +40,7 @@ public class PIDTest extends LinearOpMode {
             Pose motorPowers = rm.goToPoint(goal, currentPose, realTranslationalEndDistance,
                          realThetaEndDistance);
 
-            rm.fieldCentricMovement(rm.turnToRobotCentric(motorPowers, currentPose));
+            rm.robotCentricMovement(rm.turnToRobotCentric(motorPowers, currentPose));
 
             telemetry.addData("X: ", currentPose.getX());
             telemetry.addData("Y: ", currentPose.getY());
