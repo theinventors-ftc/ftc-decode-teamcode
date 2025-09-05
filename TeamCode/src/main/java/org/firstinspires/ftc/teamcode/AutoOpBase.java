@@ -141,6 +141,7 @@ public class AutoOpBase extends CommandOpMode {
 
         //- Default Path
         setPathState(PathState.FIRST);
+        robot.setAutoEnabled(true);
     }
 
     public void initAllianceRelated(DecodeRobot.Alliance alliance) {
