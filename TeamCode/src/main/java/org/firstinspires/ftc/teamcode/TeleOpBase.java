@@ -7,10 +7,9 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.DecodeRobot.DecodeRobot;
+import org.firstinspires.ftc.teamcode.Drive.DecodeRobot;
 import org.firstinspires.ftc.teamcode.Drive.DriveConstants;
 import org.firstinspires.ftc.teamcode.Hardware.GamepadExEx;
-import org.firstinspires.ftc.teamcode.Hardware.RobotEx;
 import org.firstinspires.ftc.teamcode.PurePursuit.Base.Coordination.Pose;
 
 @Disabled
@@ -27,7 +26,7 @@ public class TeleOpBase extends CommandOpMode {
     @Override
     public void initialize() {
         CommandScheduler.getInstance().reset();
-        robotMap = new RobotMap(hardwareMap, telemetry, gamepad1, gamepad2, RobotMap.OpMode.TELEOP);
+        robotMap = new RobotMap(hardwareMap, telemetry, gamepad1, gamepad2);
 
         // ----------------------------------- Robot Constants ---------------------------------- //
         RobotConstants = new DriveConstants();
@@ -75,13 +74,12 @@ public class TeleOpBase extends CommandOpMode {
         pose = PoseStorage.currentPose;
     }
 
-    public void initAllianceRelated(RobotEx.Alliance alliance) {
+    public void initAllianceRelated(DecodeRobot.Alliance alliance) {
         robot = new DecodeRobot(
-                robotMap,
-                RobotConstants,
-                RobotEx.OpModeType.TELEOP,
-                alliance,
-                pose
+            robotMap,
+            RobotConstants,
+            alliance,
+            pose
         );
     }
 

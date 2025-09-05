@@ -8,6 +8,7 @@ import static java.lang.Math.abs;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.teamcode.Controllers.PIDFEx;
+import org.firstinspires.ftc.teamcode.Drive.MecanumDrive;
 import org.firstinspires.ftc.teamcode.Hardware.MotorExEx;
 import org.firstinspires.ftc.teamcode.PurePursuit.Base.Coordination.Pose;
 import org.firstinspires.ftc.teamcode.PurePursuit.Base.Coordination.Vector;
@@ -57,7 +58,8 @@ public class RobotMovement {
     private Pose
         currentPose = new Pose(0,0,0),
         followPoint = new Pose(0, 0, 0),
-        realEnd = new Pose(0, 0, 0);
+        realEnd = new Pose(0, 0, 0),
+        goTo = new Pose(0,0,0);
 
     /*-- Constructor --*/
     public RobotMovement(RobotMap robotMap, Pose startingPose) {
@@ -176,7 +178,7 @@ public class RobotMovement {
             followPoint.setTheta(theta);
 
             motorsPower = goToPoint(followPoint, currentPose, realTranslationalEndDistance, realThetaEndDistance);
-            robotCentricMovement(turnToRobotCentric(motorsPower, currentPose));
+            goTo = turnToRobotCentric(motorsPower, currentPose);
         }
     }
 
@@ -328,33 +330,7 @@ public class RobotMovement {
         return new Pose(-rotX, rotY, fixedPose.getTheta());
     }
 
-    /*-- Movement --*/
-    public void robotCentricMovement (Pose pose) {
-        // Parallel encoder motion Y Axis
-        // Perpendicular encoder motion X Axis
-        // Rotational IMU motion Theta
-
-        // Denominator is the largest motor power (absolute value) or 1
-        // This ensures all the powers maintain the same ratio,
-        // but only if at least one is out of the range [-1, 1]
-        double denominator = Math.max(abs(pose.getY()) + abs(pose.getX()) + abs(pose.getTheta()), 1);
-        double frontLeftPower = (pose.getY() + pose.getX() + pose.getTheta()) / denominator;
-        double backLeftPower = (pose.getY() - pose.getX() + pose.getTheta()) / denominator;
-        double frontRightPower = (pose.getY() - pose.getX() - pose.getTheta()) / denominator;
-        double backRightPower = (pose.getY() + pose.getX() - pose.getTheta()) / denominator;
-
-        robotMap.getFrontLeftMotor().set(frontLeftPower);
-        robotMap.getRearLeftMotor().set(backLeftPower);
-        robotMap.getFrontRightMotor().set(frontRightPower);
-        robotMap.getRearRightMotor().set(backRightPower);
-    }
-
     public void breakFollowing() {
-        robotMap.getFrontLeftMotor().setZeroPowerBehavior(MotorExEx.ZeroPowerBehavior.FLOAT);
-        robotMap.getRearLeftMotor().setZeroPowerBehavior(MotorExEx.ZeroPowerBehavior.FLOAT);
-        robotMap.getFrontRightMotor().setZeroPowerBehavior(MotorExEx.ZeroPowerBehavior.FLOAT);
-        robotMap.getRearRightMotor().setZeroPowerBehavior(MotorExEx.ZeroPowerBehavior.FLOAT);
-
         isFinished = true;
     }
 
@@ -434,5 +410,9 @@ public class RobotMovement {
         lowerPerpendicularPID.reset();
         upperRotationalPID.reset();
         lowerRotationalPID.reset();
+    }
+
+    public Pose getPowers() {
+        return goTo;
     }
 }

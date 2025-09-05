@@ -18,13 +18,7 @@ import org.jetbrains.annotations.NotNull;
 import java.lang.reflect.Modifier;
 
 public class RobotMap {
-    public enum OpMode {
-        AUTO,
-        TELEOP
-    }
-    private OpMode opMode;
     private GamepadExEx driverOp, toolOp;
-
     private MotorExEx frontLeft, rearLeft, frontRight, rearRight;
 //    private IMU imu;
     private GoBildaPinpointDriver odo;
@@ -34,17 +28,16 @@ public class RobotMap {
     private GoBildaPinpointDriver.GoBildaOdometryPods encoderRes;
 
     public RobotMap(HardwareMap hm, Telemetry telemetry) {
-        this(hm, telemetry, null, null, OpMode.AUTO);
+        this(hm, telemetry, null, null);
 
     }
 
     public RobotMap (HardwareMap hm, Telemetry telemetry, Gamepad driverOp,
-                     Gamepad toolOp, OpMode opMode) {
+                     Gamepad toolOp) {
         this.telemetry = telemetry;
         this.hm = hm;
         this.driverOp = new GamepadExEx(driverOp);
         this.toolOp = new GamepadExEx(toolOp);
-        this.opMode = opMode;
 
         /*--Motors--*/
         frontLeft = new MotorExEx(hm, "frontLeft", Motor.GoBILDA.RPM_435);

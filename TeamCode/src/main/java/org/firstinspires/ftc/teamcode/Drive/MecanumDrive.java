@@ -20,7 +20,7 @@ public class MecanumDrive {
 
     private boolean fieldCentricEnabled = true;
 
-    private boolean is_enabled = true;
+    private boolean autoEnabled = false;
 
     public MecanumDrive(
             RobotMap robotMap,
@@ -81,11 +81,12 @@ public class MecanumDrive {
 
     public void drive(double strafeSpeed, double forwardSpeed, double turnSpeed, double heading, double slow_input)
     {
-        if(is_enabled){
+        if(!autoEnabled){
             drive.setMaxSpeed(RobotConstants.DEFAULT_SPEED_PERC - slow_input * RobotConstants.SLOW_SPEED_PERC);
             drive.driveFieldCentric(strafeSpeed, forwardSpeed, turnSpeed, fieldCentricEnabled ? heading : 0);
         } else {
             drive.setMaxSpeed(1);
+            drive.driveRobotCentric(strafeSpeed,forwardSpeed, turnSpeed);
         }
     }
 
@@ -137,7 +138,7 @@ public class MecanumDrive {
         fieldCentricEnabled = false;
     }
 
-    public void setEnabled(boolean enabled) {
-        is_enabled = enabled;
+    public void setAutoEnabled(boolean enabled) {
+        autoEnabled = enabled;
     }
 }
