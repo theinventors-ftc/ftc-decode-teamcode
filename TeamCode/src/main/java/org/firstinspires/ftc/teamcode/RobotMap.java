@@ -132,4 +132,9 @@ public class RobotMap {
     public IMU getIMU() {
         return null;
     }
+
+    public HardwareMap getHm() {
+        return hm;
+    }
+
 }

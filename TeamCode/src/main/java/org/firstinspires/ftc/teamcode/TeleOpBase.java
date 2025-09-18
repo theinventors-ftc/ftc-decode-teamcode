@@ -12,7 +12,7 @@ import org.firstinspires.ftc.teamcode.Drive.DriveConstants;
 import org.firstinspires.ftc.teamcode.Hardware.GamepadExEx;
 import org.firstinspires.ftc.teamcode.PurePursuit.Base.Coordination.Pose;
 
-@Disabled
+//@Disabled
 @TeleOp(name = "Do not run this TeleOP", group = "")
 public class TeleOpBase extends CommandOpMode {
     GamepadExEx driverOp, toolOp;
@@ -65,13 +65,15 @@ public class TeleOpBase extends CommandOpMode {
         RobotConstants.VELO_KD = 0;
 
         RobotConstants.TICKS_PER_REV = 537;
-        RobotConstants.MAX_RPM = 435;
+        RobotConstants.MAX_RPM = 312;
 
         RobotConstants.DEFAULT_SPEED_PERC = 1.0;
         RobotConstants.SLOW_SPEED_PERC = 0.7;
 
         // ---------------------------- Transfer Pose from Autonomous --------------------------- //
         pose = PoseStorage.currentPose;
+
+        initAllianceRelated(DecodeRobot.Alliance.BLUE);
     }
 
     public void initAllianceRelated(DecodeRobot.Alliance alliance) {

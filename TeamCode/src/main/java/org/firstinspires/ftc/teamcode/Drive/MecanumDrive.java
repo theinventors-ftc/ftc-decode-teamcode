@@ -86,7 +86,7 @@ public class MecanumDrive {
             drive.driveFieldCentric(strafeSpeed, forwardSpeed, turnSpeed, fieldCentricEnabled ? heading : 0);
         } else {
             drive.setMaxSpeed(1);
-            drive.driveRobotCentric(strafeSpeed,forwardSpeed, turnSpeed);
+            drive.driveRobotCentric(strafeSpeed, forwardSpeed, turnSpeed);
         }
     }
 
