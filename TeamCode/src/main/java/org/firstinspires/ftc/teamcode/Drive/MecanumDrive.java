@@ -43,39 +43,15 @@ public class MecanumDrive {
 
         setZeroPowerBehavior(MotorExEx.ZeroPowerBehavior.BRAKE);
 
-        if (RobotConstants.RUN_USING_ENCODER && RobotConstants.MOTOR_VELO_PID != null) {
-            setPIDFCoefficients(RobotConstants.VELO_KP, RobotConstants.VELO_KI, RobotConstants.VELO_KD);
-
-            frontLeft.setFeedforwardCoefficients(
-                    RobotConstants.frontLeftFeedForward[0],
-                    RobotConstants.frontLeftFeedForward[1],
-                    RobotConstants.frontLeftFeedForward[2]
-            );
-            frontRight.setFeedforwardCoefficients(
-                    RobotConstants.frontRightFeedForward[0],
-                    RobotConstants.frontRightFeedForward[1],
-                    RobotConstants.frontRightFeedForward[2]
-            );
-            rearLeft.setFeedforwardCoefficients(
-                    RobotConstants.rearLeftFeedForward[0],
-                    RobotConstants.rearLeftFeedForward[1],
-                    RobotConstants.rearLeftFeedForward[2]
-            );
-            rearRight.setFeedforwardCoefficients(
-                    RobotConstants.rearRightFeedForward[0],
-                    RobotConstants.rearRightFeedForward[1],
-                    RobotConstants.rearRightFeedForward[2]
-            );
-        }
-
         frontLeft.resetEncoder();
         frontRight.resetEncoder();
         rearLeft.resetEncoder();
         rearRight.resetEncoder();
 
-        setMotorsInverted(RobotConstants.frontLeftInverted, RobotConstants.frontRightInverted, RobotConstants.rearRightInverted, RobotConstants.rearLeftInverted);
+        setMotorsInverted(RobotConstants.frontLeftInverted, RobotConstants.frontRightInverted, RobotConstants.rearLeftInverted, RobotConstants.rearRightInverted);
+
         drive = new com.arcrobotics.ftclib.drivebase.MecanumDrive(
-                frontLeft, frontRight, rearLeft, rearRight
+                false, frontLeft, frontRight, rearLeft, rearRight
         );
     }
 
@@ -91,14 +67,14 @@ public class MecanumDrive {
     }
 
     public void setMotorsInverted(
-            boolean leftFrontInverted, boolean rightFrontInverted,
-            boolean rightRearInverted, boolean leftRearInverted
+            boolean frontLeftInv, boolean frontRightInv,
+            boolean rearLeftInv, boolean rearRightInv
     )
     {
-        frontLeft.setInverted(leftFrontInverted);
-        rearLeft.setInverted(leftRearInverted);
-        frontRight.setInverted(rightFrontInverted);
-        rearRight.setInverted(rightRearInverted);
+        frontLeft.setInverted(frontLeftInv);
+        frontRight.setInverted(frontRightInv);
+        rearLeft.setInverted(rearLeftInv);
+        rearRight.setInverted(rearRightInv);
     }
     public void setMode(Motor.RunMode mode)
     {
@@ -114,13 +90,6 @@ public class MecanumDrive {
     {
         for (MotorExEx motor : motors)
             motor.setZeroPowerBehavior(zeroPowerBehavior);
-    }
-    public void setPIDFCoefficients(double kP, double kI, double kD)
-    {
-        for (MotorExEx motor : motors) {
-            motor.setIntegralBounds(RobotConstants.minIntegralBound, RobotConstants.maxIntegralBound);
-            motor.setVeloCoefficients(kP, kI, kD);
-        }
     }
 
     public MotorExEx[] getMotors() {

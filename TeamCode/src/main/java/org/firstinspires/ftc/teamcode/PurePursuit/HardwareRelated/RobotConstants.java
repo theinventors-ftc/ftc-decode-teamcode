@@ -9,8 +9,8 @@ public class RobotConstants {
     private static double
 
         /*-- Localization --*/
-        forwardY = -1.2,
-        strafeX = -5.75,
+        forwardY = -6.9881889763,
+        strafeX = -8.09055,
 
         /*-- Robot Movement --*/
         maxVelocity = 10, // max target velocity for the path follow (ticks per second)

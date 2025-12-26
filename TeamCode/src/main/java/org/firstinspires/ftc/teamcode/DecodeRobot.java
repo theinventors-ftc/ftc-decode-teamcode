@@ -1,16 +1,23 @@
-package org.firstinspires.ftc.teamcode.Drive;
+package org.firstinspires.ftc.teamcode;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.arcrobotics.ftclib.command.CommandScheduler;
+import com.arcrobotics.ftclib.command.ConditionalCommand;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.button.Trigger;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.Drive.DriveConstants;
+import org.firstinspires.ftc.teamcode.Drive.MecanumDrive;
 import org.firstinspires.ftc.teamcode.Hardware.GamepadExEx;
 import org.firstinspires.ftc.teamcode.Hardware.IMUSubsystem;
+import org.firstinspires.ftc.teamcode.Mechanisms.Intake;
+import org.firstinspires.ftc.teamcode.Mechanisms.Passthough;
+import org.firstinspires.ftc.teamcode.Mechanisms.Shooter;
 import org.firstinspires.ftc.teamcode.PurePursuit.Base.Coordination.Pose;
-import org.firstinspires.ftc.teamcode.RobotMap;
+import org.firstinspires.ftc.teamcode.PurePursuit.Base.Math.MathFunction;
+import org.firstinspires.ftc.teamcode.PurePursuit.HardwareRelated.Localization.PinpointLocalizer;
 
 public class DecodeRobot {
     public enum Alliance {
@@ -20,8 +27,7 @@ public class DecodeRobot {
     protected Alliance alliance;
 
     protected FtcDashboard dashboard;
-    protected GamepadExEx driverOp;
-    protected GamepadExEx toolOp;
+    protected GamepadExEx driverOp, toolOp;
     protected Telemetry telemetry;
 
     protected MecanumDrive drive = null;
@@ -29,17 +35,29 @@ public class DecodeRobot {
 
     private boolean hasInit = false;
 
-    public DecodeRobot(RobotMap robotMap, DriveConstants driveConstants, Alliance alliance, Pose pose
+    protected PinpointLocalizer teleOpLocalizer;
+
+    // Mechanisms
+    protected Intake intake;
+    protected Passthough passthough;
+    protected Shooter shooter;
+
+    protected MotifStorage.MotifState motif;
+
+    public DecodeRobot(RobotMap robotMap, DriveConstants driveConstants, Alliance alliance,
+                       Pose pose, MotifStorage.MotifState motif
     ) {
         this.alliance = alliance;
+        this.motif = motif;
 
         initCommon(robotMap, driveConstants);
         initTele(robotMap, pose);
 
+        // Init Mechanisms when driver starts moving the robot
         new Trigger(() -> (Math.abs(drivetrainForward()) > 0.1 ||
             Math.abs(drivetrainStrafe()) > 0.1 ||
             Math.abs(drivetrainTurn()) > 0.1) && !hasInit)
-            .whenActive(new InstantCommand(this::initMechanismsTeleOp));
+            .whenActive(new InstantCommand(() -> this.initMechanismsTeleOp(robotMap)));
     }
 
     public DecodeRobot(RobotMap robotMap, DriveConstants driveConstants, Alliance alliance
@@ -64,9 +82,14 @@ public class DecodeRobot {
     }
 
     public void drive_update() {
+        teleOpLocalizer.update();
+
+        telemetry.addData("Pose", "X: %.2f, Y: %.2f, Theta: %.2f",
+            getPose().getX(), getPose().getY(), getPose().getTheta());
+
         drive.drive(
-            drivetrainForward(),
             drivetrainStrafe(),
+            drivetrainForward(),
             drivetrainTurn(),
             getHeading(),
             driverOp.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER)
@@ -112,6 +135,16 @@ public class DecodeRobot {
     public Alliance getAlliance() {
         return alliance;
     }
+    public MotifStorage.MotifState getMotif() {
+        return motif;
+    }
+
+    public Pose getPose() {
+        return teleOpLocalizer.getPose();
+    }
+    public Pose getPoseVelocity() {
+        return teleOpLocalizer.getVelocity();
+    }
 
     /*-- Initializations --*/
     public void initCommon(RobotMap robotMap, DriveConstants driveConstants) {
@@ -131,12 +164,12 @@ public class DecodeRobot {
     }
 
     public void initTele(RobotMap robotMap, Pose startingPose) {
+        teleOpLocalizer = new PinpointLocalizer(robotMap, startingPose);
         //- IMU
         //TODO: turn this into the pinpoint heading
         gyro = new IMUSubsystem(
             robotMap,
-            () -> robotMap.getOdometry().getHeading(),
-            Math.toDegrees(startingPose.getTheta())
+            () -> MathFunction.wrapDegrees(getPose().getTheta())
         );
 
         CommandScheduler.getInstance().registerSubsystem(gyro);
@@ -151,8 +184,26 @@ public class DecodeRobot {
         //TODO: make init Mechanisms
     }
 
-    public void initMechanismsTeleOp() {
+    public void initMechanismsTeleOp(RobotMap robotMap) {
         hasInit = true;
-        //TODO: make init Mechanisms
+
+        driverOp.getGamepadButton(GamepadKeys.Button.START).whenPressed(gyro::resetPinPointYawValue);
+
+        intake = new Intake(robotMap);
+//        passthough = new Passthough(robotMap, getMotif());
+        shooter = new Shooter(
+            robotMap,
+            this::getPose,
+            alliance,
+            telemetry
+        );
+
+        toolOp.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whenPressed(new ConditionalCommand(
+                new InstantCommand(intake::intake),
+                new InstantCommand(intake::stop),
+                () -> intake.getState() == Intake.IntakeState.STOPPED
+        ));
+
+        // koympia
     }
 }

@@ -16,8 +16,16 @@ public class MathFunction {
         }
 
         return analogAngle * 360;
+    }
 
-//        return angle % 360;
+    public static double wrapDegrees(double angleDeg) { // angle -> (-180, 180)
+        angleDeg = angleDeg % 360.0;
+        if (angleDeg > 180.0) {
+            angleDeg -= 360.0;
+        } else if (angleDeg <= -180.0) {
+            angleDeg += 360.0;
+        }
+        return angleDeg;
     }
 
     public static double angleErrorWrap(double angle, double gyroValueDouble) {
@@ -109,10 +117,5 @@ public class MathFunction {
     public static Pose subtractPoses(Pose one, Pose two) {
         return new Pose(one.getX() - two.getX(), one.getY() - two.getY(),
                         one.getTheta() - two.getTheta());
-    }
-
-    public static double map(double x, double in_min, double in_max, double out_min, double out_max) {
-//        Range.scale();
-        return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
     }
 }

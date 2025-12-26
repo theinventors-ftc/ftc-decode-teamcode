@@ -50,7 +50,6 @@ public class PinpointLocalizer {
     private boolean pinpointCooked = false;
 
     public PinpointLocalizer (RobotMap robotMap, Pose startingPose) {
-
         odo = robotMap.getOdometry();
 
         setOffsets(RobotConstants.getForwardY(), RobotConstants.getStrafeX());
@@ -62,6 +61,12 @@ public class PinpointLocalizer {
 
         totalHeading = 0;
         timer = new NanoTimer();
+        odo.setPosition(
+                new Pose(startingPose.getX(),
+                        startingPose.getX(),
+                        Math.toRadians(startingPose.getTheta())
+                )
+        );
         pinpointPose = startingPose;
         currentVelocity = new Pose(0,0,0);
         deltaTimeNano = 1;
@@ -81,7 +86,7 @@ public class PinpointLocalizer {
     }
 
     public void setPose(Pose setPose) {
-        odo.setPosition(new Pose(setPose.getX(), setPose.getY(), setPose.getTheta()));
+        odo.setPosition(new Pose(setPose.getX(), setPose.getX(), Math.toRadians(setPose.getTheta())));
         pinpointPose = setPose;
         previousHeading = setPose.getTheta();
     }

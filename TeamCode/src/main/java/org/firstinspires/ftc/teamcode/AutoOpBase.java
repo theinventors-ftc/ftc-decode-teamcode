@@ -6,7 +6,6 @@ import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
-import org.firstinspires.ftc.teamcode.Drive.DecodeRobot;
 import org.firstinspires.ftc.teamcode.Drive.DriveConstants;
 import org.firstinspires.ftc.teamcode.PurePursuit.Base.Coordination.Pose;
 import org.firstinspires.ftc.teamcode.PurePursuit.HardwareRelated.RobotConstants;
@@ -128,10 +127,6 @@ public class AutoOpBase extends CommandOpMode {
         driveConstants.rearRightFeedForward[0] = 0;
         driveConstants.rearRightFeedForward[1] = 1;
         driveConstants.rearRightFeedForward[2] = 0;
-
-        driveConstants.VELO_KP = 0;
-        driveConstants.VELO_KI = 0;
-        driveConstants.VELO_KD = 0;
 
         driveConstants.TICKS_PER_REV = 537;
         driveConstants.MAX_RPM = 435;

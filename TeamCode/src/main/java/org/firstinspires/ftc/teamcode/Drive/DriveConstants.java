@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode.Drive;
 
-import com.qualcomm.robotcore.hardware.PIDFCoefficients;
-
 public class DriveConstants {
     public static double[] frontLeftFeedForward = {0, 1, 0};
     public static double[] frontRightFeedForward = {0, 1, 0};
@@ -14,27 +12,15 @@ public class DriveConstants {
     public static double MAX_ANG_ACCEL = Math.toRadians(279.98601117318435);
 
     public static double TICKS_PER_REV = 537.6;
-    public static double MAX_RPM = 312;
+    public static double MAX_RPM = 1150;
 
-    public static double VELO_KP = 1.1;
-    public static double VELO_KI = 2.7;
-    public static double VELO_KD = 0;
-
-    public static double minIntegralBound = -400;
-    public static double maxIntegralBound = 400;
-
-    public static double kStatic = 0;
-    public static double kV = 1.0 / rpmToVelocity(MAX_RPM);
-    public static double kA = 0;
-
-    public static boolean RUN_USING_ENCODER = true;
-    public static PIDFCoefficients MOTOR_VELO_PID = new PIDFCoefficients(19, 0, 9,13.5);
+    public static boolean RUN_USING_ENCODER = false;
 
     public static double WHEEL_RADIUS = 1.8898; // in
     public static double GEAR_RATIO = 0.99639; // output (wheel) speed / input (motor) speed
     public static double TRACK_WIDTH = 11.54; // in
 
-    public static boolean frontLeftInverted = true, frontRightInverted = true, rearRightInverted = true, rearLeftInverted = true;
+    public static boolean frontLeftInverted = true, frontRightInverted = false, rearRightInverted = true, rearLeftInverted = false;
 
     public static double DEFAULT_SPEED_PERC = 1.0;
     public static double SLOW_SPEED_PERC = 0.7;
