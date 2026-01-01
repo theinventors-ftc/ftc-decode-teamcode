@@ -12,6 +12,7 @@ import org.firstinspires.ftc.teamcode.Drive.DriveConstants;
 import org.firstinspires.ftc.teamcode.Drive.MecanumDrive;
 import org.firstinspires.ftc.teamcode.Hardware.GamepadExEx;
 import org.firstinspires.ftc.teamcode.Hardware.IMUSubsystem;
+import org.firstinspires.ftc.teamcode.Hardware.PinpointYawWrapper;
 import org.firstinspires.ftc.teamcode.Mechanisms.Intake;
 import org.firstinspires.ftc.teamcode.Mechanisms.Passthough;
 import org.firstinspires.ftc.teamcode.Mechanisms.Shooter;
@@ -31,7 +32,7 @@ public class DecodeRobot {
     protected Telemetry telemetry;
 
     protected MecanumDrive drive = null;
-    protected IMUSubsystem gyro;
+    protected PinpointYawWrapper yawWrapper;
 
     private boolean hasInit = false;
 
@@ -121,20 +122,17 @@ public class DecodeRobot {
 
     /*-- Getters --*/
     public double getHeading() {
-        return gyro.getRawYaw();
+        return yawWrapper.getRawYaw();
     }
 
     public double getContinuousHeading() {
-        return gyro.getYaw();
-    }
-
-    public double getHeadingVelocity() {
-        return 0.0; // TODO: Implement
+        return yawWrapper.getContinuousYaw();
     }
 
     public Alliance getAlliance() {
         return alliance;
     }
+
     public MotifStorage.MotifState getMotif() {
         return motif;
     }
@@ -165,14 +163,12 @@ public class DecodeRobot {
 
     public void initTele(RobotMap robotMap, Pose startingPose) {
         teleOpLocalizer = new PinpointLocalizer(robotMap, startingPose);
-        //- IMU
-        //TODO: turn this into the pinpoint heading
-        gyro = new IMUSubsystem(
+
+        yawWrapper = new PinpointYawWrapper(
             robotMap,
             () -> MathFunction.wrapDegrees(getPose().getTheta())
         );
-
-        CommandScheduler.getInstance().registerSubsystem(gyro);
+        CommandScheduler.getInstance().registerSubsystem(yawWrapper);
 
         //- Gamepads
         this.driverOp = robotMap.getDriverOp();
@@ -187,7 +183,7 @@ public class DecodeRobot {
     public void initMechanismsTeleOp(RobotMap robotMap) {
         hasInit = true;
 
-        driverOp.getGamepadButton(GamepadKeys.Button.START).whenPressed(gyro::resetPinPointYawValue);
+        driverOp.getGamepadButton(GamepadKeys.Button.START).whenPressed(yawWrapper::resetYawValue);
 
         intake = new Intake(robotMap);
 //        passthough = new Passthough(robotMap, getMotif());

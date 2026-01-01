@@ -10,8 +10,7 @@ import org.firstinspires.ftc.teamcode.RobotMap;
 
 @Config
 public class Intake extends SubsystemBase {
-    private final MotorExEx frontMotor;//, rearMotor;
-    private final ServoImplEx arm, pass; //pass: 0, 0.15,
+    private final MotorExEx frontMotor, rearMotor;
 
     private final double INTAKE_POWER = 1.0;
 
@@ -24,16 +23,11 @@ public class Intake extends SubsystemBase {
     private IntakeState state = IntakeState.STOPPED;
     private Telemetry telemetry;
 
-    public static double pos1 = 0.0, pos2 = 0.71;
-
     public Intake(RobotMap robotMap) {
         this.frontMotor = robotMap.getIntakeFrontMotor();
-//        this.rearMotor = robotMap.getIntakeRearMotor();
-        this.arm = robotMap.getArm();
-        this.pass = robotMap.getPassServo();
-
+        this.rearMotor = robotMap.getIntakeRearMotor();
         frontMotor.setZeroPowerBehavior(MotorExEx.ZeroPowerBehavior.BRAKE);
-//        rearMotor.setZeroPowerBehavior(MotorExEx.ZeroPowerBehavior.BRAKE);
+        rearMotor.setZeroPowerBehavior(MotorExEx.ZeroPowerBehavior.BRAKE);
 
         this.telemetry = robotMap.getTelemetry();
     }
@@ -41,27 +35,24 @@ public class Intake extends SubsystemBase {
     @Override
     public void periodic() {
         telemetry.addData("[Intake] State ", state);
-
-        pass.setPosition(pos1);
-        arm.setPosition(pos2);
     }
 
     public void intake() {
-        frontMotor.set(INTAKE_POWER);
-//        rearMotor.set(INTAKE_POWER);
         state = IntakeState.INTAKE;
+        frontMotor.set(INTAKE_POWER);
+        rearMotor.set(INTAKE_POWER);
     }
 
     public void reverse() {
-        frontMotor.set(-INTAKE_POWER);
-//        rearMotor.set(-INTAKE_POWER);
         state = IntakeState.REVERSE;
+        frontMotor.set(-INTAKE_POWER);
+        rearMotor.set(-INTAKE_POWER);
     }
 
     public void stop() {
-        frontMotor.set(0);
-//        rearMotor.set(0);
         state = IntakeState.STOPPED;
+        frontMotor.set(0);
+        rearMotor.set(0);
     }
 
     public IntakeState getState() {

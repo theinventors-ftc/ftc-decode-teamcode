@@ -1,7 +1,7 @@
 package org.firstinspires.ftc.teamcode.PurePursuit.HardwareRelated;
 
 import com.acmerobotics.dashboard.config.Config;
-import org.firstinspires.ftc.teamcode.Controllers.PIDFExCon;
+import org.firstinspires.ftc.teamcode.Controllers.PIDFExCoeffs;
 
 @Config
 public class RobotConstants {
@@ -42,9 +42,9 @@ public class RobotConstants {
         robotY = 15; // robot's size in the y axis
 
     /*-- Follower --*/
-    public static PIDFExCon
+    public static PIDFExCoeffs
 
-        upperParallelPID = new PIDFExCon(
+        upperParallelPID = new PIDFExCoeffs(
             0.1,
             0.0,
             0.0,
@@ -54,7 +54,7 @@ public class RobotConstants {
             0.0,
             0.0
         ),
-        lowerParallelPID = new PIDFExCon(
+        lowerParallelPID = new PIDFExCoeffs(
             0.05,
             0.0,
             0.0,
@@ -64,7 +64,7 @@ public class RobotConstants {
             0.0,
             0.0
         ),
-        upperPerpendicularPID = new PIDFExCon(
+        upperPerpendicularPID = new PIDFExCoeffs(
             0.1,
             0.0,
             0.0,
@@ -74,7 +74,7 @@ public class RobotConstants {
             0.0,
             0.0
         ),
-        lowerPerpendicularPID = new PIDFExCon(
+        lowerPerpendicularPID = new PIDFExCoeffs(
             0.05,
             0.0,
             0.0,
@@ -84,7 +84,7 @@ public class RobotConstants {
             0.0,
             0.0
         ),
-        upperRotationalPID = new PIDFExCon(
+        upperRotationalPID = new PIDFExCoeffs(
             0.04,
             0.0,
             0.0,
@@ -94,7 +94,7 @@ public class RobotConstants {
             0.0,
             0.0
         ),
-        lowerRotationalPID = new PIDFExCon(
+        lowerRotationalPID = new PIDFExCoeffs(
             0.01,
             0.0,
             0.0,
@@ -154,22 +154,22 @@ public class RobotConstants {
     public static void setHybridThetaDistanceThreshold(double set) {
         RobotConstants.hybridThetaDistanceThreshold = set;
     }
-    public static void setUpperParallelPID(PIDFExCon set) {
+    public static void setUpperParallelPID(PIDFExCoeffs set) {
         RobotConstants.upperParallelPID = set;
     }
-    public static void setLowerParallelPID(PIDFExCon set) {
+    public static void setLowerParallelPID(PIDFExCoeffs set) {
         RobotConstants.lowerParallelPID = set;
     }
-    public static void setUpperPerpendicularPID(PIDFExCon set) {
+    public static void setUpperPerpendicularPID(PIDFExCoeffs set) {
         RobotConstants.upperPerpendicularPID = set;
     }
-    public static void setLowerPerpendicularPID(PIDFExCon set) {
+    public static void setLowerPerpendicularPID(PIDFExCoeffs set) {
         RobotConstants.lowerPerpendicularPID = set;
     }
-    public static void setUpperRotationalPID(PIDFExCon set) {
+    public static void setUpperRotationalPID(PIDFExCoeffs set) {
         RobotConstants.upperRotationalPID = set;
     }
-    public static void setLowerRotationalPID(PIDFExCon set) {
+    public static void setLowerRotationalPID(PIDFExCoeffs set) {
         RobotConstants.lowerRotationalPID = set;
     }
     public static void setLowerPIDThreshold_X(double set) {
@@ -231,22 +231,22 @@ public class RobotConstants {
     public static double getHybridThetaDistanceThreshold() {
         return hybridThetaDistanceThreshold;
     }
-    public static PIDFExCon getUpperParallelPID() {
+    public static PIDFExCoeffs getUpperParallelPID() {
         return upperParallelPID;
     }
-    public static PIDFExCon getLowerParallelPID() {
+    public static PIDFExCoeffs getLowerParallelPID() {
         return lowerParallelPID;
     }
-    public static PIDFExCon getUpperPerpendicularPID() {
+    public static PIDFExCoeffs getUpperPerpendicularPID() {
         return upperPerpendicularPID;
     }
-    public static PIDFExCon getLowerPerpendicularPID() {
+    public static PIDFExCoeffs getLowerPerpendicularPID() {
         return lowerPerpendicularPID;
     }
-    public static PIDFExCon getUpperRotationalPID() {
+    public static PIDFExCoeffs getUpperRotationalPID() {
         return upperRotationalPID;
     }
-    public static PIDFExCon getLowerRotationalPID() {
+    public static PIDFExCoeffs getLowerRotationalPID() {
         return lowerRotationalPID;
     }
     public static double getLowerPIDThreshold_X() {

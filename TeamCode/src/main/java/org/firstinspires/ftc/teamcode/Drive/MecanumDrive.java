@@ -36,30 +36,33 @@ public class MecanumDrive {
 
         motors = Arrays.asList(frontLeft, frontRight, rearLeft, rearRight);
 
-        if (RobotConstants.RUN_USING_ENCODER) {
-            setMode(MotorExEx.RunMode.VelocityControl);
-            resetEncoders();
-        }
-
         setZeroPowerBehavior(MotorExEx.ZeroPowerBehavior.BRAKE);
 
-        frontLeft.resetEncoder();
-        frontRight.resetEncoder();
-        rearLeft.resetEncoder();
-        rearRight.resetEncoder();
-
-        setMotorsInverted(RobotConstants.frontLeftInverted, RobotConstants.frontRightInverted, RobotConstants.rearLeftInverted, RobotConstants.rearRightInverted);
+        setMotorsInverted(
+                RobotConstants.frontLeftInverted,
+                RobotConstants.frontRightInverted,
+                RobotConstants.rearLeftInverted,
+                RobotConstants.rearRightInverted
+        );
 
         drive = new com.arcrobotics.ftclib.drivebase.MecanumDrive(
                 false, frontLeft, frontRight, rearLeft, rearRight
         );
     }
 
-    public void drive(double strafeSpeed, double forwardSpeed, double turnSpeed, double heading, double slow_input)
+    public void drive(double strafeSpeed, double forwardSpeed, double turnSpeed,
+                      double heading, double slow_input)
     {
         if(!autoEnabled){
-            drive.setMaxSpeed(RobotConstants.DEFAULT_SPEED_PERC - slow_input * RobotConstants.SLOW_SPEED_PERC);
-            drive.driveFieldCentric(strafeSpeed, forwardSpeed, turnSpeed, fieldCentricEnabled ? heading : 0);
+            drive.setMaxSpeed(
+                    RobotConstants.DEFAULT_SPEED_PERC - slow_input * RobotConstants.SLOW_SPEED_PERC
+            );
+            drive.driveFieldCentric(
+                    strafeSpeed,
+                    forwardSpeed,
+                    turnSpeed,
+                    fieldCentricEnabled ? heading : 0
+            );
         } else {
             drive.setMaxSpeed(1);
             drive.driveRobotCentric(strafeSpeed,forwardSpeed, turnSpeed);
@@ -75,15 +78,6 @@ public class MecanumDrive {
         frontRight.setInverted(frontRightInv);
         rearLeft.setInverted(rearLeftInv);
         rearRight.setInverted(rearRightInv);
-    }
-    public void setMode(Motor.RunMode mode)
-    {
-        for (MotorExEx motor : motors)
-            motor.setRunMode(mode);
-    }
-
-    public void resetEncoders() {
-        for (MotorExEx motor : motors) motor.resetEncoder();
     }
 
     public void setZeroPowerBehavior(MotorExEx.ZeroPowerBehavior zeroPowerBehavior)

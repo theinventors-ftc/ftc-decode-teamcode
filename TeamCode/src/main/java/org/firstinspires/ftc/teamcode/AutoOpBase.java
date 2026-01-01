@@ -104,33 +104,6 @@ public class AutoOpBase extends CommandOpMode {
         driveConstants.rearRightInverted = true;
         driveConstants.rearLeftInverted = true;
 
-        driveConstants.WHEEL_RADIUS = 1; // inch
-        driveConstants.GEAR_RATIO = 1; // output (wheel) speed / input (motor) speed
-        driveConstants.TRACK_WIDTH = 10; // in
-
-        driveConstants.MAX_VEL = 90;
-        driveConstants.MAX_ACCEL = 90;
-        driveConstants.MAX_ANG_VEL = Math.toRadians(360);
-        driveConstants.MAX_ANG_ACCEL = Math.toRadians(360);
-
-        driveConstants.RUN_USING_ENCODER = false;
-
-        driveConstants.frontLeftFeedForward[0] = 0;
-        driveConstants.frontLeftFeedForward[1] = 1;
-        driveConstants.frontLeftFeedForward[2] = 0;
-        driveConstants.frontRightFeedForward[0] = 0;
-        driveConstants.frontRightFeedForward[1] = 1;
-        driveConstants.frontRightFeedForward[2] = 0;
-        driveConstants.rearLeftFeedForward[0] = 0;
-        driveConstants.rearLeftFeedForward[1] = 1;
-        driveConstants.rearLeftFeedForward[2] = 0;
-        driveConstants.rearRightFeedForward[0] = 0;
-        driveConstants.rearRightFeedForward[1] = 1;
-        driveConstants.rearRightFeedForward[2] = 0;
-
-        driveConstants.TICKS_PER_REV = 537;
-        driveConstants.MAX_RPM = 435;
-
         driveConstants.DEFAULT_SPEED_PERC = 1.0;
         driveConstants.SLOW_SPEED_PERC = 0.7;
 

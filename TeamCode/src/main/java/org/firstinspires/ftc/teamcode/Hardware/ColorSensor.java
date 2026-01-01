@@ -60,7 +60,12 @@ public class ColorSensor extends SubsystemBase {
 
     public double[] getNormalizedColors() {
         NormalizedRGBA colors = sensor.getNormalizedColors();
-        return new double[]{Math.floor(colors.red*100), Math.floor(colors.green*100), Math.floor(colors.blue*100), Math.floor(colors.alpha*100)};
+        return new double[]{
+                Math.floor(colors.red*100),
+                Math.floor(colors.green*100),
+                Math.floor(colors.blue*100),
+                Math.floor(colors.alpha*100)
+        };
     }
 
     //    Returns a double [0, 100) describing the concentration of Red Color

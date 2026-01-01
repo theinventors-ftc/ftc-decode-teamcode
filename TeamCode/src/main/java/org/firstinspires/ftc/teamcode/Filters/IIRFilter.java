@@ -14,7 +14,8 @@ public class IIRFilter {
 
         public void calculate() {
             raw_value = value.getAsDouble();
-            smoothed_value = (1-smoothing_constant) * value.getAsDouble() + smoothing_constant * smoothed_value;
+            smoothed_value = (1-smoothing_constant) * value.getAsDouble()
+                    + smoothing_constant * smoothed_value;
         }
 
         public void set(double new_smoothing_constant){

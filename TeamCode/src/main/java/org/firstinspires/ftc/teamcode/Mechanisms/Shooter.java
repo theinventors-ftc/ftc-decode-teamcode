@@ -4,24 +4,19 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.controller.wpilibcontroller.SimpleMotorFeedforward;
-import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.arcrobotics.ftclib.util.InterpLUT;
-import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.hardware.ServoImplEx;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.Supplier;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.Controllers.PIDFEx;
-import org.firstinspires.ftc.teamcode.Controllers.PIDFExCon;
+import org.firstinspires.ftc.teamcode.Controllers.PIDFExCoeffs;
 import org.firstinspires.ftc.teamcode.DecodeRobot;
 import org.firstinspires.ftc.teamcode.Hardware.MotorExEx;
 import org.firstinspires.ftc.teamcode.PurePursuit.Base.Coordination.Pose;
 import org.firstinspires.ftc.teamcode.PurePursuit.Base.Math.MathFunction;
 import org.firstinspires.ftc.teamcode.RobotMap;
-
-import java.util.function.DoubleSupplier;
 
 @Config
 public class Shooter extends SubsystemBase {
@@ -48,7 +43,7 @@ public class Shooter extends SubsystemBase {
     private final int TICKS_PER_FULL_ROTATION = (int)(MOTOR_TICKS_PER_REV * GEAR_RATIO);
 
     private PIDFEx turretController, veloController; // TODO: Motion Profiling!!! Minimize
-    private PIDFExCon coeffsTurret, coeffsVelo;
+    private PIDFExCoeffs coeffsTurret, coeffsVelo;
     private SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(0, 1, 0);
 
     private static final int WHEEL_TICKS_PER_REV = 28, WHEEL_MAX_RPM = 5800;
@@ -67,7 +62,7 @@ public class Shooter extends SubsystemBase {
         this.turretMotor = robotMap.getTurretMotor();
         turretMotor.resetEncoder();
         turretMotor.setZeroPowerBehavior(MotorExEx.ZeroPowerBehavior.BRAKE);
-        coeffsTurret = new PIDFExCon(
+        coeffsTurret = new PIDFExCoeffs(
                 0.045,
                 0.0,
                 0.005,
@@ -79,7 +74,7 @@ public class Shooter extends SubsystemBase {
         );
         turretController = new PIDFEx(coeffsTurret);
 
-        coeffsVelo = new PIDFExCon(
+        coeffsVelo = new PIDFExCoeffs(
                 0.00085,
                 0.0,
                 0.0,

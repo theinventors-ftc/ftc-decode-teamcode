@@ -36,33 +36,6 @@ public class TeleOpBase extends CommandOpMode {
         RobotConstants.rearRightInverted = false;
         RobotConstants.rearLeftInverted = true;
 
-        RobotConstants.WHEEL_RADIUS = 1; // inch
-        RobotConstants.GEAR_RATIO = 1; // output (wheel) speed / input (motor) speed
-        RobotConstants.TRACK_WIDTH = 10; // in
-
-        RobotConstants.MAX_VEL = 90;
-        RobotConstants.MAX_ACCEL = 90;
-        RobotConstants.MAX_ANG_VEL = Math.toRadians(360);
-        RobotConstants.MAX_ANG_ACCEL = Math.toRadians(360);
-
-        RobotConstants.RUN_USING_ENCODER = false;
-
-        RobotConstants.frontLeftFeedForward[0] = 0;
-        RobotConstants.frontLeftFeedForward[1] = 1;
-        RobotConstants.frontLeftFeedForward[2] = 0;
-        RobotConstants.frontRightFeedForward[0] = 0;
-        RobotConstants.frontRightFeedForward[1] = 1;
-        RobotConstants.frontRightFeedForward[2] = 0;
-        RobotConstants.rearLeftFeedForward[0] = 0;
-        RobotConstants.rearLeftFeedForward[1] = 1;
-        RobotConstants.rearLeftFeedForward[2] = 0;
-        RobotConstants.rearRightFeedForward[0] = 0;
-        RobotConstants.rearRightFeedForward[1] = 1;
-        RobotConstants.rearRightFeedForward[2] = 0;
-
-        RobotConstants.TICKS_PER_REV = 145.6;
-        RobotConstants.MAX_RPM = 1150;
-
         RobotConstants.DEFAULT_SPEED_PERC = 1.0;
         RobotConstants.SLOW_SPEED_PERC = 0.7;
 
