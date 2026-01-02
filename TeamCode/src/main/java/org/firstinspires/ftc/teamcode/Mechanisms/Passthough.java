@@ -71,8 +71,8 @@ public class Passthough extends SubsystemBase {
     private double distance_threshold = 40.0; // TODO: Chack if sensor hits a hole on the artifact
 
     // ----------------------------------------- Util ------------------------------------------- //
-
     private MotifStorage.MotifState motif;
+    private int[] shooting_order = {-1, -1, -1};
 
     private Telemetry telemetry;
 
@@ -94,12 +94,17 @@ public class Passthough extends SubsystemBase {
 
     @Override
     public void periodic() {
+        updateCurrentColors(); // TODO: REMOVE IF TOO MUCH I2C TRAFFIC
+        shootingOrderMotif(); // TODO: REMOVE IF TOO MUCH CALCULATION
+
         telemetry.addData("[Passthough] FingerF State: ", getState(0));
         telemetry.addData("[Passthough] FingerC State: ", getState(1));
         telemetry.addData("[Passthough] FingerR State: ", getState(1));
         telemetry.addData("[Passthough] ColorF: ", getCurrentColor(0));
         telemetry.addData("[Passthough] ColorC: ", getCurrentColor(1));
         telemetry.addData("[Passthough] ColorR: ", getCurrentColor(2));
+        telemetry.addData("[Passthough] Shooting Order:", "%d, %d, %d",
+                shooting_order[0], shooting_order[1], shooting_order[2]);
     }
 
     // ------------------------------------- Finger Control ------------------------------------- //
@@ -151,8 +156,8 @@ public class Passthough extends SubsystemBase {
         return current_colors[finger];
     }
 
-    public int[] shootingOrderMotif() {
-        int[] order = {-1, -1, -1};
+    public void shootingOrderMotif() {
+        this.shooting_order = new int[]{-1, -1, -1};
 
         int purple_count = 0, green_count = 0;
         for(Color color : current_colors) {
@@ -160,7 +165,7 @@ public class Passthough extends SubsystemBase {
             else if(color == Color.GREEN) green_count++;
         }
 
-        if(purple_count != 2 || green_count != 1) return null;
+        if(purple_count != 2 || green_count != 1) return;
 
         Color[] desired = MOTIF_MAP.get(motif);
 
@@ -171,12 +176,10 @@ public class Passthough extends SubsystemBase {
             for (int finger = 0; finger < 3; finger++) {
                 if (!used[finger] && current_colors[finger] == desired[i]) {
                     used[finger] = true;
-                    order[i] = finger + 1; // convert to 1-based index
+                    shooting_order[i] = finger + 1;
                     break;
                 }
             }
         }
-
-        return order;
     }
 }

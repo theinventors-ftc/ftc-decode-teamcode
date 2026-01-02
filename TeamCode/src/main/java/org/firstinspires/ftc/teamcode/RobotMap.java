@@ -2,6 +2,8 @@ package org.firstinspires.ftc.teamcode;
 
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.hardware.lynx.LynxModule;
+import com.qualcomm.robotcore.hardware.AnalogInput;
+import com.qualcomm.robotcore.hardware.CRServoImplEx;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
@@ -37,9 +39,10 @@ public class RobotMap {
     ColorSensor colorSensorF, colorSensorC, colorSensorR;
 
     // Shooter
-    MotorExEx wheel1, wheel2, turretMotor;
+    MotorExEx wheel1, wheel2;
     ServoImplEx hoodServo;
-
+    CRServoImplEx turretServoDriver, turretServoFollower;
+    AnalogInput turretServoPot;
 
     public RobotMap(HardwareMap hm, Telemetry telemetry) {
         this(hm, telemetry, null, null);
@@ -56,10 +59,10 @@ public class RobotMap {
         hubs = hm.getAll(LynxModule.class);
 
         /*--Motors--*/
-        frontLeft = new MotorExEx(hm, "frontLeft", Motor.GoBILDA.RPM_312);
-        rearLeft = new MotorExEx(hm, "rearLeft", Motor.GoBILDA.RPM_312);
-        frontRight = new MotorExEx(hm, "frontRight", Motor.GoBILDA.RPM_312);
-        rearRight = new MotorExEx(hm, "rearRight", Motor.GoBILDA.RPM_312);
+        frontLeft = new MotorExEx(hm, "frontLeft", Motor.GoBILDA.RPM_1150);
+        rearLeft = new MotorExEx(hm, "rearLeft", Motor.GoBILDA.RPM_1150);
+        frontRight = new MotorExEx(hm, "frontRight", Motor.GoBILDA.RPM_1150);
+        rearRight = new MotorExEx(hm, "rearRight", Motor.GoBILDA.RPM_1150);
 
         frontLeft.setRunMode(Motor.RunMode.RawPower);
         rearLeft.setRunMode(Motor.RunMode.RawPower);
@@ -70,16 +73,6 @@ public class RobotMap {
         rearLeft.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
         rearRight.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
         frontRight.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
-
-//        /*--IMU--*/
-//        imu = hm.get(IMU .class, "external_imu");
-//        IMU.Parameters imuParameters = new IMU.Parameters(
-//            new RevHubOrientationOnRobot(
-//                RevHubOrientationOnRobot.LogoFacingDirection.BACKWARD,
-//                RevHubOrientationOnRobot.UsbFacingDirection.DOWN
-//            )
-//        );
-//        imu.initialize(imuParameters);
 
         /*--Encoders--*/
         odo = hm.get(GoBildaPinpointDriver.class, "odometry");
@@ -95,24 +88,24 @@ public class RobotMap {
         //// ----------------------------------- Mechanisms ----------------------------------- ////
         // Intake
         intakeF = new MotorExEx(hm, "intake", Motor.GoBILDA.RPM_1150);
-//        intakeR = new MotorExEx(hm, "intakeR", Motor.GoBILDA.RPM_1150);
-        armF = hm.get(ServoImplEx.class, "arm");
-        passServo = hm.get(ServoImplEx.class, "passthrough");
-////        armR = hm.get(ServoImplEx.class, "armR");
-//
-//        // Passthrough
-//        fingerF = hm.get(ServoImplEx.class, "fingerF");
-//        fingerC = hm.get(ServoImplEx.class, "fingerC");
-//        fingerR = hm.get(ServoImplEx.class, "fingerR");
-//        colorSensorF = new ColorSensor(hm, "colorSensorF");
-//        colorSensorC = new ColorSensor(hm, "colorSensorC");
-//        colorSensorR = new ColorSensor(hm, "colorSensorR");
+        intakeR = new MotorExEx(hm, "intakeR", Motor.GoBILDA.RPM_1150);
+
+        // Passthrough
+        fingerF = hm.get(ServoImplEx.class, "fingerF");
+        fingerC = hm.get(ServoImplEx.class, "fingerC");
+        fingerR = hm.get(ServoImplEx.class, "fingerR");
+        colorSensorF = new ColorSensor(hm, "colorSensorF");
+        colorSensorC = new ColorSensor(hm, "colorSensorC");
+        colorSensorR = new ColorSensor(hm, "colorSensorR");
 
         // Shooter
         wheel1 = new MotorExEx(hm, "wheel1", Motor.GoBILDA.BARE);
         wheel2 = new MotorExEx(hm, "wheel2", Motor.GoBILDA.BARE);
-        turretMotor = new MotorExEx(hm, "turretMotor", Motor.GoBILDA.RPM_312);
+
         hoodServo = hm.get(ServoImplEx.class, "hoodServo");
+        turretServoDriver = hm.get(CRServoImplEx.class, "turretServoDriver");
+        turretServoFollower = hm.get(CRServoImplEx.class, "turretServoFollower");
+        turretServoPot = hm.get(AnalogInput.class, "turretServoPot");
     }
 
     // ---------------------------------------- Gamepads ---------------------------------------- //
@@ -223,11 +216,19 @@ public class RobotMap {
         return wheel2;
     }
 
-    public MotorExEx getTurretMotor() {
-        return turretMotor;
-    }
-
     public ServoImplEx getHoodServo() {
         return hoodServo;
+    }
+
+    public CRServoImplEx getTurretServoDriver() {
+        return turretServoDriver;
+    }
+
+    public CRServoImplEx getTurretServoFollower() {
+        return turretServoFollower;
+    }
+
+    public AnalogInput getTurretServoPot() {
+        return turretServoPot;
     }
 }
