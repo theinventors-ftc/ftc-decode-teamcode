@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.Mechanisms;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.qualcomm.robotcore.hardware.ServoImplEx;
 
@@ -11,6 +12,7 @@ import org.firstinspires.ftc.teamcode.RobotMap;
 
 import java.util.Map;
 
+@Config
 public class Passthough extends SubsystemBase {
     // ---------------------------------------- Hardware ---------------------------------------- //
     private final ServoImplEx fingerF, fingerC, fingerR; // F: Front, C: Center, R: Rear
@@ -19,17 +21,19 @@ public class Passthough extends SubsystemBase {
     private final ServoImplEx[] fingers;
     private final ColorSensor[] colorSensors;
 
+    public static int gain = 50;
+
     // ---------------------------------------- States ------------------------------------------ //
 
     public enum FingerState {
         INTAKE,
-        TOUCH,
+        HOLD,
         FEED;
 
         double[][] positions = {
-                {0.0, 0.5, 1.0}, // FRONT
-                {0.0, 0.5, 1.0}, // CENTER
-                {0.0, 0.5, 1.0}  // REAR
+                {0.94, 0.97, 0.42}, // FRONT
+                {0.9, 0.93, 0.38}, // CENTER 0.93, 0.89
+                {0.09, 0.075, 0.6}  // REAR
         };
 
         public double getPosition(int idx) {
@@ -52,8 +56,8 @@ public class Passthough extends SubsystemBase {
     }
 
     private Map<Color, Double[]> target_colors = Map.of(
-            Color.PURPLE, new Double[]{0.0, 0.0, 0.0},
-            Color.GREEN, new Double[]{0.0, 0.0, 0.0}
+            Color.PURPLE, new Double[]{0.504, 0.616, 0.961},
+            Color.GREEN, new Double[]{0.246, 0.940, 0.714}
     );
 
     private Color[] current_colors = {
@@ -68,11 +72,13 @@ public class Passthough extends SubsystemBase {
             MotifStorage.MotifState.GPP, new Color[]{Color.GREEN, Color.PURPLE, Color.PURPLE}
     );
 
-    private double distance_threshold = 40.0; // TODO: Chack if sensor hits a hole on the artifact
+    private double distance_threshold = 30.0; // TODO: Chack if sensor hits a hole on the artifact
 
     // ----------------------------------------- Util ------------------------------------------- //
     private MotifStorage.MotifState motif;
     private int[] shooting_order = {-1, -1, -1};
+
+    private char[] names = {'F', 'C', 'R'};
 
     private Telemetry telemetry;
 
@@ -90,12 +96,18 @@ public class Passthough extends SubsystemBase {
         colorSensors = new ColorSensor[]{colorSensorF, colorSensorC, colorSensorR};
 
         this.telemetry = robotMap.getTelemetry();
+
+        setState(0, FingerState.HOLD);
+        setState(1, FingerState.HOLD);
+        setState(2, FingerState.HOLD);
     }
 
     @Override
     public void periodic() {
         updateCurrentColors(); // TODO: REMOVE IF TOO MUCH I2C TRAFFIC
-        shootingOrderMotif(); // TODO: REMOVE IF TOO MUCH CALCULATION
+//        shootingOrderMotif(); // TODO: REMOVE IF TOO MUCH CALCULATION
+//
+//        colorSensorR.setGain(gain);
 
         telemetry.addData("[Passthough] FingerF State: ", getState(0));
         telemetry.addData("[Passthough] FingerC State: ", getState(1));
@@ -103,13 +115,16 @@ public class Passthough extends SubsystemBase {
         telemetry.addData("[Passthough] ColorF: ", getCurrentColor(0));
         telemetry.addData("[Passthough] ColorC: ", getCurrentColor(1));
         telemetry.addData("[Passthough] ColorR: ", getCurrentColor(2));
-        telemetry.addData("[Passthough] Shooting Order:", "%d, %d, %d",
-                shooting_order[0], shooting_order[1], shooting_order[2]);
+        if(shooting_order[0] != -1) {
+            telemetry.addData("[Passthough] Shooting Order:", "%c, %c, %c",
+                    names[shooting_order[0]], names[shooting_order[1]], names[shooting_order[2]]);
+        }
     }
 
     // ------------------------------------- Finger Control ------------------------------------- //
     public void setState(int finger, FingerState state) {
-        if(state == getState(finger)) return;
+//        if(state == getState(finger)) return;
+        states[finger] = state;
         fingers[finger].setPosition(state.getPosition(finger));
     }
 
@@ -119,13 +134,16 @@ public class Passthough extends SubsystemBase {
 
     // ------------------------------------- Color Sensors -------------------------------------- //
     private Color detectColor(int finger) {
-        double[] colors = colorSensors[finger].getNormalizedColors();
-        double distances = colorSensors[finger].getDistance(DistanceUnit.MM);
+        double[] colors = colorSensors[finger].getRawColors();
+        double distance = colorSensors[finger].getDistance(DistanceUnit.MM);
+
+        telemetry.addData("[Passthough] ", "Finger %d:  %.3f, %.3f, %.3f", finger, colors[0], colors[1], colors[2]);
+        telemetry.addData("[Passthough] ", "Finger %d:  %.3f", finger, distance);
 
         double minColorDistance = Double.MAX_VALUE;
         Color detectedColor = Color.NONE;
 
-        if(distances < distance_threshold) {
+        if(distance < distance_threshold) {
             for (Color color : Color.values()) {
                 if (color == Color.NONE) continue;
                 Double[] target = target_colors.get(color);
@@ -176,7 +194,7 @@ public class Passthough extends SubsystemBase {
             for (int finger = 0; finger < 3; finger++) {
                 if (!used[finger] && current_colors[finger] == desired[i]) {
                     used[finger] = true;
-                    shooting_order[i] = finger + 1;
+                    shooting_order[i] = finger + 0;
                     break;
                 }
             }

@@ -1,9 +1,13 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.arcrobotics.ftclib.command.ConditionalCommand;
 import com.arcrobotics.ftclib.command.InstantCommand;
+import com.arcrobotics.ftclib.command.SequentialCommandGroup;
+import com.arcrobotics.ftclib.command.WaitCommand;
+import com.arcrobotics.ftclib.command.WaitUntilCommand;
 import com.arcrobotics.ftclib.command.button.Trigger;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 
@@ -20,6 +24,7 @@ import org.firstinspires.ftc.teamcode.PurePursuit.Base.Coordination.Pose;
 import org.firstinspires.ftc.teamcode.PurePursuit.Base.Math.MathFunction;
 import org.firstinspires.ftc.teamcode.PurePursuit.HardwareRelated.Localization.PinpointLocalizer;
 
+@Config
 public class DecodeRobot {
     public enum Alliance {
         RED,
@@ -41,6 +46,7 @@ public class DecodeRobot {
     // Mechanisms
     protected Intake intake;
     protected Passthough passthough;
+    public static int fingerBetween = 80, fingerHold = 340;
     protected Shooter shooter;
 
     protected MotifStorage.MotifState motif;
@@ -53,12 +59,13 @@ public class DecodeRobot {
 
         initCommon(robotMap, driveConstants);
         initTele(robotMap, pose);
+        this.initMechanismsTeleOp(robotMap);
 
-        // Init Mechanisms when driver starts moving the robot
-        new Trigger(() -> (Math.abs(drivetrainForward()) > 0.1 ||
-            Math.abs(drivetrainStrafe()) > 0.1 ||
-            Math.abs(drivetrainTurn()) > 0.1) && !hasInit)
-            .whenActive(new InstantCommand(() -> this.initMechanismsTeleOp(robotMap)));
+//        // Init Mechanisms when driver starts moving the robot
+//        new Trigger(() -> (Math.abs(drivetrainForward()) > 0.1 ||
+//            Math.abs(drivetrainStrafe()) > 0.1 ||
+//            Math.abs(drivetrainTurn()) > 0.1) && !hasInit)
+//            .whenActive(new InstantCommand(() -> this.initMechanismsTeleOp(robotMap)));
     }
 
     public DecodeRobot(RobotMap robotMap, DriveConstants driveConstants, Alliance alliance
@@ -185,8 +192,8 @@ public class DecodeRobot {
 
         driverOp.getGamepadButton(GamepadKeys.Button.START).whenPressed(yawWrapper::resetYawValue);
 
-        intake = new Intake(robotMap);
-//        passthough = new Passthough(robotMap, getMotif());
+        intake = new Intake(robotMap, this::getHeading, this::drivetrainForward, this::drivetrainStrafe);
+        passthough = new Passthough(robotMap, getMotif());
         shooter = new Shooter(
             robotMap,
             this::getPose,
@@ -194,12 +201,79 @@ public class DecodeRobot {
             telemetry
         );
 
-        toolOp.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whenPressed(new ConditionalCommand(
-                new InstantCommand(intake::intake),
-                new InstantCommand(intake::stop),
-                () -> intake.getState() == Intake.IntakeState.STOPPED
+        driverOp.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whenPressed(new ConditionalCommand(
+                new SequentialCommandGroup(
+                        new InstantCommand(intake::intake, intake),
+                        new InstantCommand(() -> passthough.setState(0, Passthough.FingerState.INTAKE), passthough),
+                        new InstantCommand(() -> passthough.setState(1, Passthough.FingerState.INTAKE), passthough),
+                        new InstantCommand(() -> passthough.setState(2, Passthough.FingerState.INTAKE), passthough)
+                ),
+                new SequentialCommandGroup(
+                        new InstantCommand(intake::stop, intake),
+                        new InstantCommand(() -> passthough.setState(0, Passthough.FingerState.HOLD), passthough),
+                        new InstantCommand(() -> passthough.setState(1, Passthough.FingerState.HOLD), passthough),
+                        new InstantCommand(() -> passthough.setState(2, Passthough.FingerState.HOLD), passthough)
+                ),
+                () -> intake.getState() != Intake.IntakeState.INTAKE
         ));
 
-        // koympia
+        driverOp.getGamepadButton(GamepadKeys.Button.A).whenPressed((new ConditionalCommand(
+                new SequentialCommandGroup(
+                        new WaitUntilCommand(() -> shooter.wheelsAtSpeed()),
+                        new InstantCommand(() -> passthough.setState(0, Passthough.FingerState.FEED), passthough),
+                        new WaitCommand(fingerHold),
+                        new InstantCommand(() -> passthough.setState(0, Passthough.FingerState.HOLD), passthough)
+                ),
+                new InstantCommand(),
+                () -> shooter.turretInRange()
+        )));
+
+        driverOp.getGamepadButton(GamepadKeys.Button.A).whenPressed((new ConditionalCommand(
+                new SequentialCommandGroup(
+                        new WaitUntilCommand(() -> shooter.wheelsAtSpeed()),
+                        new InstantCommand(() -> passthough.setState(1, Passthough.FingerState.FEED), passthough),
+                        new WaitCommand(fingerHold),
+                        new InstantCommand(() -> passthough.setState(1, Passthough.FingerState.HOLD), passthough)
+                ),
+                new InstantCommand(),
+                () -> shooter.turretInRange()
+        )));
+
+        driverOp.getGamepadButton(GamepadKeys.Button.A).whenPressed((new ConditionalCommand(
+                new SequentialCommandGroup(
+                        new WaitUntilCommand(() -> shooter.wheelsAtSpeed()),
+                        new InstantCommand(() -> passthough.setState(2, Passthough.FingerState.FEED), passthough),
+                        new WaitCommand(fingerHold),
+                        new InstantCommand(() -> passthough.setState(2, Passthough.FingerState.HOLD), passthough)
+                ),
+                new InstantCommand(),
+                () -> shooter.turretInRange()
+        )));
+
+        driverOp.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).whenPressed(new ConditionalCommand(
+                new SequentialCommandGroup(
+                        new WaitUntilCommand(() -> shooter.wheelsAtSpeed()),
+                        new InstantCommand(() -> passthough.setState(0, Passthough.FingerState.FEED), passthough),
+                        new WaitCommand(fingerHold),
+                        new InstantCommand(() -> passthough.setState(0, Passthough.FingerState.HOLD), passthough),
+                        new WaitCommand(fingerBetween),
+                        new InstantCommand(() -> passthough.setState(1, Passthough.FingerState.FEED), passthough),
+                        new WaitCommand(fingerHold),
+                        new InstantCommand(() -> passthough.setState(1, Passthough.FingerState.HOLD), passthough),
+                        new WaitCommand(fingerBetween),
+                        new InstantCommand(() -> passthough.setState(2, Passthough.FingerState.FEED), passthough),
+                        new WaitCommand(fingerHold),
+                        new InstantCommand(() -> passthough.setState(2, Passthough.FingerState.HOLD), passthough),
+                        new WaitCommand(fingerBetween)
+                ),
+                new InstantCommand(),
+                () -> shooter.turretInRange()
+        ));
+
+        driverOp.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(new ConditionalCommand(
+                new InstantCommand(shooter::enableWheels, shooter),
+                new InstantCommand(shooter::disableWheels, shooter),
+                () -> !shooter.areWheelsEnabled()
+        ));
     }
 }

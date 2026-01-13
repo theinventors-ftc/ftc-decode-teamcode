@@ -11,6 +11,7 @@ import com.qualcomm.robotcore.hardware.ServoImplEx;
 import com.qualcomm.robotcore.hardware.configuration.ServoFlavor;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.Hardware.Battery;
 import org.firstinspires.ftc.teamcode.Hardware.ColorSensor;
 import org.firstinspires.ftc.teamcode.Hardware.GamepadExEx;
 import org.firstinspires.ftc.teamcode.Hardware.MotorExEx;
@@ -28,6 +29,7 @@ public class RobotMap {
     private List<LynxModule> hubs;
     private Telemetry telemetry;
     private GoBildaPinpointDriver.GoBildaOdometryPods encoderRes;
+    private Battery battery;
 
     //// Mechanisms
     //Intake
@@ -39,10 +41,10 @@ public class RobotMap {
     ColorSensor colorSensorF, colorSensorC, colorSensorR;
 
     // Shooter
-    MotorExEx wheel1, wheel2;
+    MotorExEx wheel1, wheel2, turret;
     ServoImplEx hoodServo;
-    CRServoImplEx turretServoDriver, turretServoFollower;
-    AnalogInput turretServoPot;
+//    CRServoImplEx turretServoDriver, turretServoFollower;
+//    AnalogInput turretServoPot;
 
     public RobotMap(HardwareMap hm, Telemetry telemetry) {
         this(hm, telemetry, null, null);
@@ -57,6 +59,7 @@ public class RobotMap {
         if(toolOp != null) this.toolOp = new GamepadExEx(toolOp);
 
         hubs = hm.getAll(LynxModule.class);
+        battery = new Battery(hm);
 
         /*--Motors--*/
         frontLeft = new MotorExEx(hm, "frontLeft", Motor.GoBILDA.RPM_1150);
@@ -77,7 +80,7 @@ public class RobotMap {
         /*--Encoders--*/
         odo = hm.get(GoBildaPinpointDriver.class, "odometry");
         encoderRes = GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD;
-        forwardEncoderDirection = GoBildaPinpointDriver.EncoderDirection.REVERSED;
+        forwardEncoderDirection = GoBildaPinpointDriver.EncoderDirection.FORWARD;
         strafeEncoderDirection = GoBildaPinpointDriver.EncoderDirection.FORWARD;
 
         /*--Util--*/
@@ -87,8 +90,8 @@ public class RobotMap {
 
         //// ----------------------------------- Mechanisms ----------------------------------- ////
         // Intake
-        intakeF = new MotorExEx(hm, "intake", Motor.GoBILDA.RPM_1150);
-        intakeR = new MotorExEx(hm, "intakeR", Motor.GoBILDA.RPM_1150);
+        intakeF = new MotorExEx(hm, "intakeFront", Motor.GoBILDA.RPM_1150);
+        intakeR = new MotorExEx(hm, "intakeRear", Motor.GoBILDA.RPM_1150);
 
         // Passthrough
         fingerF = hm.get(ServoImplEx.class, "fingerF");
@@ -97,15 +100,19 @@ public class RobotMap {
         colorSensorF = new ColorSensor(hm, "colorSensorF");
         colorSensorC = new ColorSensor(hm, "colorSensorC");
         colorSensorR = new ColorSensor(hm, "colorSensorR");
+        colorSensorF.setGain(75);
+        colorSensorC.setGain(40);
+        colorSensorR.setGain(75);
 
         // Shooter
         wheel1 = new MotorExEx(hm, "wheel1", Motor.GoBILDA.BARE);
-        wheel2 = new MotorExEx(hm, "wheel2", Motor.GoBILDA.BARE);
+//        wheel2 = new MotorExEx(hm, "wheel2", Motor.GoBILDA.BARE);
 
         hoodServo = hm.get(ServoImplEx.class, "hoodServo");
-        turretServoDriver = hm.get(CRServoImplEx.class, "turretServoDriver");
-        turretServoFollower = hm.get(CRServoImplEx.class, "turretServoFollower");
-        turretServoPot = hm.get(AnalogInput.class, "turretServoPot");
+        turret = new MotorExEx(hm, "turret", Motor.GoBILDA.RPM_435);
+//        turretServoDriver = hm.get(CRServoImplEx.class, "turretServoDriver");
+//        turretServoFollower = hm.get(CRServoImplEx.class, "turretServoFollower");
+//        turretServoPot = hm.get(AnalogInput.class, "turretServoPot");
     }
 
     // ---------------------------------------- Gamepads ---------------------------------------- //
@@ -158,6 +165,7 @@ public class RobotMap {
     public List<LynxModule> getHubs() {
         return hubs;
     }
+    public Battery getBattery() { return battery; }
 
     // ------------------------------------------ IMU ------------------------------------------- //
     public IMU getIMU() {
@@ -220,15 +228,18 @@ public class RobotMap {
         return hoodServo;
     }
 
-    public CRServoImplEx getTurretServoDriver() {
-        return turretServoDriver;
+//    public CRServoImplEx getTurretServoDriver() {
+//        return turretServoDriver;
+//    }
+
+//    public CRServoImplEx getTurretServoFollower() {
+//        return turretServoFollower;
+//    }
+    public MotorExEx getTurretMotor() {
+        return turret;
     }
 
-    public CRServoImplEx getTurretServoFollower() {
-        return turretServoFollower;
-    }
-
-    public AnalogInput getTurretServoPot() {
-        return turretServoPot;
-    }
+//    public AnalogInput getTurretServoPot() {
+//        return turretServoPot;
+//    }
 }

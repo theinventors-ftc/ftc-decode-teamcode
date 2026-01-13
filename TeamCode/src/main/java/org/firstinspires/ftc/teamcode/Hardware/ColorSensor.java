@@ -61,30 +61,35 @@ public class ColorSensor extends SubsystemBase {
     public double[] getNormalizedColors() {
         NormalizedRGBA colors = sensor.getNormalizedColors();
         return new double[]{
-                Math.floor(colors.red*100),
-                Math.floor(colors.green*100),
-                Math.floor(colors.blue*100),
-                Math.floor(colors.alpha*100)
+                Math.floor(colors.red*100.0),
+                Math.floor(colors.green*100.0),
+                Math.floor(colors.blue*100.0),
+                Math.floor(colors.alpha*100.0)
         };
+    }
+
+    public double[] getRawColors() {
+        NormalizedRGBA colors = sensor.getNormalizedColors();
+        return new double[]{colors.red, colors.green, colors.blue, colors.alpha};
     }
 
     //    Returns a double [0, 100) describing the concentration of Red Color
     public double getRed() {
-        return Math.floor(sensor.getNormalizedColors().red*100);
+        return Math.floor(sensor.getNormalizedColors().red*100.0);
     }
     //    Returns a double [0, 100) describing the concentration of Green Color
 
     public double getGreen() {
-        return Math.floor(sensor.getNormalizedColors().green*100);
+        return Math.floor(sensor.getNormalizedColors().green*100.0);
     }
 
     //    Returns a double [0, 100) describing the concentration of Blue Color
     public double getBlue() {
-        return Math.floor(sensor.getNormalizedColors().blue*100);
+        return Math.floor(sensor.getNormalizedColors().blue*100.0);
     }
 
     //    Returns a double [0, 100) describing the concentration of Alpha Value
     public double getAlpha() {
-        return Math.floor(sensor.getNormalizedColors().alpha*100);
+        return Math.floor(sensor.getNormalizedColors().alpha*100.0);
     }
 }

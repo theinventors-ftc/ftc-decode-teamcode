@@ -1,12 +1,9 @@
 package org.firstinspires.ftc.teamcode.Mechanisms;
 
-import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.controller.wpilibcontroller.SimpleMotorFeedforward;
 import com.arcrobotics.ftclib.util.InterpLUT;
-import com.qualcomm.robotcore.hardware.AnalogInput;
-import com.qualcomm.robotcore.hardware.CRServoImplEx;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.ServoImplEx;
 import com.qualcomm.robotcore.util.Range;
@@ -22,16 +19,17 @@ import org.firstinspires.ftc.teamcode.Hardware.MotorExEx;
 import org.firstinspires.ftc.teamcode.PurePursuit.Base.Coordination.Pose;
 import org.firstinspires.ftc.teamcode.PurePursuit.Base.Math.MathFunction;
 import org.firstinspires.ftc.teamcode.RobotMap;
-import org.firstinspires.ftc.teamcode.Util.Timer;
 
 import java.util.function.DoubleSupplier;
 
 @Config
-public class Shooter extends SubsystemBase {
+public class ShooterMP extends SubsystemBase {
     // ---------------------------------------- Hardware ---------------------------------------- //
     private MotorExEx wheel1, wheel2;
     private ServoImplEx hoodServo;
+//    private CRServoImplEx turretServoDriver, turretServoFollower;
     private MotorExEx turretMotor;
+//    private AnalogInput turretServoPot;
 
     // ---------------------------------------- Constants --------------------------------------- //
     // Wheel
@@ -43,7 +41,10 @@ public class Shooter extends SubsystemBase {
 
     // Turret
     private static final double TICKS_PER_FULL_ROTATION = 1916.0;
-    private static final double TURRET_MULTIPLIER = 1.0, MAX_TURRET_POWER = 0.9;
+    private static final double TURRET_MULTIPLIER = 1.0, MAX_TURRET_POWER = 1.0;
+
+    // --------------------------- Turret Angle Calculation Variables --------------------------- //
+    private double turns = 0, prevRawTurretServoAngle = 0;
 
     // ----------------------------------------- States ----------------------------------------- //
     private boolean wheelsEnabled = false;
@@ -52,13 +53,15 @@ public class Shooter extends SubsystemBase {
 
     // ---------------------------------------- Poses ------------------------------------------- //
     private Supplier<Pose> curPose;
-    private final Pose REDGoalPose = new Pose(70, -69, 0);
-    private final Pose BLUEGoalPose = new Pose(70, 69, 0);
+    private final Pose REDGoalPose = new Pose(69, -69, 0); // TODO: Recheck
+    private final Pose BLUEGoalPose = new Pose(69, 69, 0); // TODO: Recheck
     private final Pose goalPose;
 
     // ---------------------------------- Controllers and LUTs ---------------------------------- //
     private InterpLUT wheelSpeed, hoodAngle;
-    private PIDFEx turretController, veloController;
+    private SigmoidPositionProfile mp;
+    private PIDFEx turretController, veloController; // TODO: Motion Profiling!!! Minimize
+    public static double hood = 0.5, velo = 0.0;
     private PIDFExCoeffs coeffsTurret, coeffsVelo;
     private SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(0, 1, 0);
 
@@ -66,14 +69,21 @@ public class Shooter extends SubsystemBase {
     private Telemetry telemetry;
     private DoubleSupplier voltage;
 
-    public Shooter(RobotMap robotMap, Supplier<Pose> curPose, DecodeRobot.Alliance alliance,
-                   Telemetry telemetry) {
+    private double prev_target = 0;
+
+    public static double kpTurret = 0.037, kiTurret = 0.08, kdTurret = 0.0018;
+
+    public ShooterMP(RobotMap robotMap, Supplier<Pose> curPose, DecodeRobot.Alliance alliance,
+                     Telemetry telemetry) {
         this.wheel1 = robotMap.getShooterWheel1Motor();
 //        this.wheel2 = robotMap.getShooterWheel2Motor();
         this.hoodServo = robotMap.getHoodServo();
+//        this.turretServoDriver = robotMap.getTurretServoDriver();
+//        this.turretServoFollower = robotMap.getTurretServoFollower();
         this.turretMotor = robotMap.getTurretMotor();
         turretMotor.setInverted(true);
         turretMotor.resetEncoder();
+//        this.turretServoPot = robotMap.getTurretServoPot();
 //        this.telemetry = robotMap.getTelemetry();
         this.telemetry = telemetry;
 
@@ -85,10 +95,11 @@ public class Shooter extends SubsystemBase {
         // Select Correct Goal Based On Alliance
         goalPose = (alliance == DecodeRobot.Alliance.RED) ? REDGoalPose : BLUEGoalPose;
 
+        mp = new SigmoidPositionProfile(0.8);
         coeffsTurret = new PIDFExCoeffs(
-                0.022,
-                0.1,
-                0.0016,
+                0.037,
+                0.08,
+                0.0018,
                 0.0,
                 0.2,
                 0.1,
@@ -115,37 +126,20 @@ public class Shooter extends SubsystemBase {
         wheelSpeed = new InterpLUT();
         hoodAngle = new InterpLUT();
 
-        wheelSpeed.add(28.4, 0.54);
-        wheelSpeed.add(38.25, 0.55);
-        wheelSpeed.add(44.66, 0.57);
-        wheelSpeed.add(54.05, 0.6);
-        wheelSpeed.add(63.34, 0.62);
-        wheelSpeed.add(74.61, 0.67);
-        wheelSpeed.add(91.4, 0.69);
-        wheelSpeed.add(105.6, 0.71);
-        wheelSpeed.add(117.11, 0.75);
-        wheelSpeed.add(126.63, 0.78);
-        wheelSpeed.add(136.99, 0.82);
-        wheelSpeed.add(147.59, 0.84);
-        wheelSpeed.add(156.82, 0.86);
-        wheelSpeed.add(165.15, 0.88);
-        wheelSpeed.add(177.19, 0.92);
+        // TODO: Populate LUTs with real data
+        wheelSpeed.add(31.9, 0.74);
+        wheelSpeed.add(38, 0.72);
+        wheelSpeed.add(53.54, 0.76);
+        wheelSpeed.add(67.41, 0.78);
+        wheelSpeed.add(81.24, 0.84);
+        wheelSpeed.add(97.3, 0.91);
 
-        hoodAngle.add(28.4, 0.2);
-        hoodAngle.add(38.25, 0.3);
-        hoodAngle.add(44.66, 0.3);
-        hoodAngle.add(54.05, 0.3);
-        hoodAngle.add(63.34, 0.3);
-        hoodAngle.add(74.61, 0.4);
-        hoodAngle.add(91.4, 0.4);
-        hoodAngle.add(105.6, 0.47);
-        hoodAngle.add(117.11, 0.49);
-        hoodAngle.add(126.63, 0.55);
-        hoodAngle.add(136.99, 0.57);
-        hoodAngle.add(147.59, 0.57);
-        hoodAngle.add(156.82, 0.63);
-        hoodAngle.add(165.15, 0.63);
-        hoodAngle.add(177.19, 0.63);
+        hoodAngle.add(31.9, 0.1);
+        hoodAngle.add(38, 0.5);
+        hoodAngle.add(53.54, 0.7);
+        hoodAngle.add(67.41, 0.76);
+        hoodAngle.add(81.24, 0.7);
+        hoodAngle.add(97.3, 0.94);
 
         wheelSpeed.createLUT();
         hoodAngle.createLUT();
@@ -155,6 +149,7 @@ public class Shooter extends SubsystemBase {
 
     @Override
     public void periodic() {
+
         // ------------------------------------- Telemetry -------------------------------------- //
         telemetry.addData("[Shooter] Wheel State ", wheelsEnabled);
         telemetry.addData("[Shooter] Turret Lock ", turretLockEnabled);
@@ -162,27 +157,39 @@ public class Shooter extends SubsystemBase {
         telemetry.addData("[Shooter] Turret Angle: ", getTurretAngle());
         telemetry.addData("[Shooter] Goal Dist: ", getDistanceToGoal());
         telemetry.addData("[Shooter] Goal Angle: ", getAngleToGoal());
-//        telemetry.addData("[Shooter] Motor Current (A): ", ((DcMotorEx)wheel1.getRawMotor()).getCurrent(CurrentUnit.AMPS));
-//        telemetry.addData("[Shooter] Motor Power (W): ", voltage.getAsDouble()*velo*((DcMotorEx)wheel1.getRawMotor()).getCurrent(CurrentUnit.AMPS));
+        telemetry.addData("[Shooter] Motor Current (A): ", ((DcMotorEx)wheel1.getRawMotor()).getCurrent(CurrentUnit.AMPS));
+        telemetry.addData("[Shooter] Motor Power (W): ", voltage.getAsDouble()*velo*((DcMotorEx)wheel1.getRawMotor()).getCurrent(CurrentUnit.AMPS));
 
         // --------------------------------------- Turret --------------------------------------- //
-        turretController.setSetPoint(Range.clip(getAngleToGoal(), -90, 225));
+//        turretController.setSetPoint(Range.clip(getAngleToGoal(), -40, 270)); // TODO: Tune Clips
+//        if(getAngleToGoal() != prev_target) {
+//            mp.reset(getTurretAngle(), getAngleToGoal());
+//            prev_target = getAngleToGoal();
+//        }
+//        mp.update();
 
-//        turretMotor.set(Range.clip(
-//                turretController.calculate(getTurretAngle()),
-//                -MAX_TURRET_POWER,
-//                MAX_TURRET_POWER
-//        ));
+//        if(Math.abs(getAngleToGoal()-getTurretAngle()) < 5) {
+            turretController.setSetPoint(Range.clip(getAngleToGoal(), -90, 225));
+//        } else {
+//            turretController.setSetPoint(Range.clip(mp.getPosition(), -225, 90));
+//        }
+        setTurretPower(Range.clip(
+                turretController.calculate(getTurretAngle()),
+                -MAX_TURRET_POWER,
+                MAX_TURRET_POWER
+        ));
 
-        if(getDistanceToGoal() < 28.5 || getDistanceToGoal() > 177.8) return;
+//        if(getDistanceToGoal() < 31.9 || getDistanceToGoal() > 97.3) return; // TODO: LUT Bounds
 
         // ---------------------------------------- Hood ---------------------------------------- //
-        hoodServo.setPosition(Range.scale(
-                hoodAngle.get(getDistanceToGoal()), 0, 1, MIN_HOOD_POS, MAX_HOOD_POS)
-        );
+//        hoodServo.setPosition(Range.scale(
+//                hoodAngle.get(getDistanceToGoal()), 0, 1, MIN_HOOD_POS, MAX_HOOD_POS)
+//        );
+        hoodServo.setPosition(Range.scale(hood, 0, 1, MIN_HOOD_POS, MAX_HOOD_POS));
 
         // --------------------------------------- Wheels --------------------------------------- //
-        if(wheelsEnabled) wheel1.set(getControlledWheelPower(wheelSpeed.get(getDistanceToGoal())));
+        wheel1.set(getControlledWheelPower(velo));
+//        wheel2.set(getControlledWheelPower(wheelSpeed.get(getDistanceToGoal())));
     }
 
     // ----------------------------------------- Wheels ----------------------------------------- //
@@ -201,14 +208,11 @@ public class Shooter extends SubsystemBase {
     public void disableWheels() {
         wheelsEnabled = false;
         wheel1.set(0);
+//        wheel2.set(0);
     }
 
     public boolean areWheelsEnabled() {
         return wheelsEnabled;
-    }
-
-    public boolean wheelsAtSpeed() {
-        return Math.abs(veloController.getPositionError()) < 50;
     }
 
     // ----------------------------------------- Turret ----------------------------------------- //
@@ -216,9 +220,32 @@ public class Shooter extends SubsystemBase {
         return (((turretMotor.getCurrentPosition())%TICKS_PER_FULL_ROTATION)*360.0/TICKS_PER_FULL_ROTATION)*1.0;
     }
 
-    public boolean turretInRange() {
-        double angleToGoal = getAngleToGoal();
-        return angleToGoal > -90 && angleToGoal < 225;
+//    private double analogToDegrees(double analogVal, double maxVoltage) {
+//        return Range.scale(analogVal, 0.0, maxVoltage, 0, 360);
+//    }
+//
+//    private double servoAngleToContinuousDegrees(double rawTurretServoAngle) {
+//        if(rawTurretServoAngle != prevRawTurretServoAngle) {
+//            if (Math.abs(rawTurretServoAngle - prevRawTurretServoAngle) >= 180)
+//                turns += (rawTurretServoAngle > prevRawTurretServoAngle) ? -1 : 1;
+//
+//            prevRawTurretServoAngle = rawTurretServoAngle;
+//        }
+//        return rawTurretServoAngle + 360 * turns;
+//    }
+
+//    public double getTurretAngle() {
+//        return servoAngleToContinuousDegrees(
+//                analogToDegrees(
+//                        turretServoPot.getVoltage(), turretServoPot.getMaxVoltage()
+//                )
+//        )*TURRET_RATIO*TURRET_MULTIPLIER;
+//    }
+
+    private void setTurretPower(double power) {
+//        turretServoDriver.setPower(power);
+//        turretServoFollower.setPower(-power);
+        turretMotor.set(power);
     }
 
     // ---------------------------------------- IK Stuff ---------------------------------------- //
