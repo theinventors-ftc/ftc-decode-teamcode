@@ -44,7 +44,7 @@ public class PinpointLocalizer {
     private double previousHeading;
     private double totalHeading;
     private long deltaTimeNano;
-    private NanoTimer timer;
+    private org.firstinspires.ftc.teamcode.PurePursuit.HardwareRelated.Localization.NanoTimer timer;
     private Pose currentVelocity;
     private Pose pinpointPose;
     private boolean pinpointCooked = false;
@@ -63,7 +63,7 @@ public class PinpointLocalizer {
         timer = new NanoTimer();
         odo.setPosition(
                 new Pose(startingPose.getX(),
-                        startingPose.getY(),
+                        startingPose.getX(),
                         Math.toRadians(startingPose.getTheta())
                 )
         );
@@ -74,11 +74,11 @@ public class PinpointLocalizer {
     }
 
     public Pose getPose() {
-        return pinpointPose.get();
+        return pinpointPose;
     }
 
     public Pose getVelocity() {
-        return currentVelocity.get();
+        return currentVelocity;
     }
 
     public Vector getVelocityVector() {
@@ -170,7 +170,7 @@ public class PinpointLocalizer {
             pinpointCooked = true;
         }
 
-        return new Pose(x, y, heading); // (95.0/95.5), (95.0/95.4)
+        return new Pose(x, y, heading);
     }
 
     public boolean isNAN() {

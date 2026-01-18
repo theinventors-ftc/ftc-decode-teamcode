@@ -3,7 +3,6 @@ package org.firstinspires.ftc.teamcode.PurePursuit.Tests;
 import static java.lang.Math.abs;
 
 import com.acmerobotics.dashboard.FtcDashboard;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 

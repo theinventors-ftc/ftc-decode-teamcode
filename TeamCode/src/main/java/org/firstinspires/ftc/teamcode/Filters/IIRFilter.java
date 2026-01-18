@@ -13,9 +13,13 @@ public class IIRFilter {
         }
 
         public void calculate() {
-            raw_value = value.getAsDouble();
             smoothed_value = (1-smoothing_constant) * value.getAsDouble()
                     + smoothing_constant * smoothed_value;
+        }
+
+        public void calculate(double given) {
+            smoothed_value = (1-smoothing_constant) * given
+                + smoothing_constant * smoothed_value;
         }
 
         public void set(double new_smoothing_constant){
@@ -28,6 +32,11 @@ public class IIRFilter {
 
         public double get() {
             calculate();
+            return smoothed_value;
+        }
+
+        public double get(double given) {
+            calculate(given);
             return smoothed_value;
         }
 
