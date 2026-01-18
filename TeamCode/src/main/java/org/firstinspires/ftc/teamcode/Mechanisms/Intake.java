@@ -14,7 +14,7 @@ import java.util.function.DoubleSupplier;
 
 @Config
 public class Intake extends SubsystemBase {
-    private final MotorExEx frontMotor, rearMotor;
+    private final MotorExEx frontMotor;//, rearMotor;
 
     private final double INTAKE_POWER = 1.0;
 
@@ -33,10 +33,10 @@ public class Intake extends SubsystemBase {
     public Intake(RobotMap robotMap, DoubleSupplier robotHeading, DoubleSupplier robotForwardPower,
                   DoubleSupplier robotStrafePower) {
         this.frontMotor = robotMap.getIntakeFrontMotor();
-        this.rearMotor = robotMap.getIntakeRearMotor();
+//        this.rearMotor = robotMap.getIntakeRearMotor();
         frontMotor.setZeroPowerBehavior(MotorExEx.ZeroPowerBehavior.FLOAT);
-        rearMotor.setZeroPowerBehavior(MotorExEx.ZeroPowerBehavior.FLOAT);
-        rearMotor.setInverted(true);
+//        rearMotor.setZeroPowerBehavior(MotorExEx.ZeroPowerBehavior.FLOAT);
+//        rearMotor.setInverted(true);
 
         this.robotHeading = robotHeading;
         this.robotForwardPower = robotForwardPower;
@@ -58,7 +58,7 @@ public class Intake extends SubsystemBase {
 
         if(state == IntakeState.INTAKE) {
             frontMotor.set(Vx >= 0 ? INTAKE_POWER : 0);
-            rearMotor.set(Vx <= 0 ? INTAKE_POWER : 0);
+//            rearMotor.set(Vx <= 0 ? INTAKE_POWER : 0);
         }
     }
 
@@ -69,13 +69,13 @@ public class Intake extends SubsystemBase {
     public void reverse() {
         state = IntakeState.REVERSE;
         frontMotor.set(-INTAKE_POWER);
-        rearMotor.set(-INTAKE_POWER);
+//        rearMotor.set(-INTAKE_POWER);
     }
 
     public void stop() {
         state = IntakeState.STOPPED;
         frontMotor.set(0);
-        rearMotor.set(0);
+//        rearMotor.set(0);
     }
 
     public IntakeState getState() {

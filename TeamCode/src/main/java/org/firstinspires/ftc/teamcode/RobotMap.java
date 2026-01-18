@@ -1,14 +1,12 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.arcrobotics.ftclib.hardware.motors.Motor;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.lynx.LynxModule;
-import com.qualcomm.robotcore.hardware.AnalogInput;
-import com.qualcomm.robotcore.hardware.CRServoImplEx;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.ServoImplEx;
-import com.qualcomm.robotcore.hardware.configuration.ServoFlavor;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Hardware.Battery;
@@ -20,16 +18,21 @@ import org.firstinspires.ftc.teamcode.PurePursuit.HardwareRelated.Localization.G
 import java.util.List;
 
 public class RobotMap {
+    private HardwareMap hm;
+
     private GamepadExEx driverOp, toolOp;
+
     private MotorExEx frontLeft, rearLeft, frontRight, rearRight;
-//    private IMU imu;
+
     private GoBildaPinpointDriver odo;
     private GoBildaPinpointDriver.EncoderDirection strafeEncoderDirection, forwardEncoderDirection;
-    private HardwareMap hm;
+    private GoBildaPinpointDriver.GoBildaOdometryPods encoderRes;
+
+
     private List<LynxModule> hubs;
     private Telemetry telemetry;
-    private GoBildaPinpointDriver.GoBildaOdometryPods encoderRes;
     private Battery battery;
+    private Limelight3A limelight;
 
     //// Mechanisms
     //Intake
@@ -52,8 +55,10 @@ public class RobotMap {
 
     public RobotMap (HardwareMap hm, Telemetry telemetry, Gamepad driverOp,
                      Gamepad toolOp) {
-        this.telemetry = telemetry;
         this.hm = hm;
+
+        this.telemetry = telemetry;
+        this.telemetry.setMsTransmissionInterval(11);
 
         if(driverOp != null) this.driverOp = new GamepadExEx(driverOp);
         if(toolOp != null) this.toolOp = new GamepadExEx(toolOp);
@@ -88,6 +93,8 @@ public class RobotMap {
             module.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
         }
 
+        limelight = hm.get(Limelight3A.class, "limelight");
+
         //// ----------------------------------- Mechanisms ----------------------------------- ////
         // Intake
         intakeF = new MotorExEx(hm, "intakeFront", Motor.GoBILDA.RPM_1150);
@@ -98,7 +105,7 @@ public class RobotMap {
         fingerC = hm.get(ServoImplEx.class, "fingerC");
         fingerR = hm.get(ServoImplEx.class, "fingerR");
         colorSensorF = new ColorSensor(hm, "colorSensorF");
-        colorSensorC = new ColorSensor(hm, "colorSensorC");
+        colorSensorC = new ColorSensor(hm, "colorSensorC1");
         colorSensorR = new ColorSensor(hm, "colorSensorR");
         colorSensorF.setGain(75);
         colorSensorC.setGain(40);
@@ -166,6 +173,9 @@ public class RobotMap {
         return hubs;
     }
     public Battery getBattery() { return battery; }
+    public Limelight3A getLimelight() {
+        return limelight;
+    }
 
     // ------------------------------------------ IMU ------------------------------------------- //
     public IMU getIMU() {

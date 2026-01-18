@@ -71,5 +71,6 @@ public class TeleOpBase extends CommandOpMode {
     public void reset() {
         super.reset();
         PoseStorage.currentPose = robot.getPose(); // In case we stop TeleOP midway
+        robotMap.getLimelight().close();
     }
 }

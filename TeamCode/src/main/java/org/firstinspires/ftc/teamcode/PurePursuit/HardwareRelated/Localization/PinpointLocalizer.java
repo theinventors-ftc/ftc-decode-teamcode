@@ -63,7 +63,7 @@ public class PinpointLocalizer {
         timer = new NanoTimer();
         odo.setPosition(
                 new Pose(startingPose.getX(),
-                        startingPose.getX(),
+                        startingPose.getY(),
                         Math.toRadians(startingPose.getTheta())
                 )
         );
@@ -170,7 +170,7 @@ public class PinpointLocalizer {
             pinpointCooked = true;
         }
 
-        return new Pose(x, y, heading);
+        return new Pose(x, y, heading); // (95.0/95.5), (95.0/95.4)
     }
 
     public boolean isNAN() {

@@ -32,8 +32,8 @@ public class Passthough extends SubsystemBase {
 
         double[][] positions = {
                 {0.94, 0.97, 0.42}, // FRONT
-                {0.9, 0.93, 0.38}, // CENTER 0.93, 0.89
-                {0.09, 0.075, 0.6}  // REAR
+                {0.9, 0.93, 0.38}, // CENTER
+                {0.09, 0.04, 0.6}  // REAR
         };
 
         public double getPosition(int idx) {
@@ -66,23 +66,23 @@ public class Passthough extends SubsystemBase {
             Color.NONE
     };
 
-    private static final Map<MotifStorage.MotifState, Color[]> MOTIF_MAP = Map.of(
-            MotifStorage.MotifState.PPG, new Color[]{Color.PURPLE, Color.PURPLE, Color.GREEN},
-            MotifStorage.MotifState.PGP, new Color[]{Color.PURPLE, Color.GREEN, Color.PURPLE},
-            MotifStorage.MotifState.GPP, new Color[]{Color.GREEN, Color.PURPLE, Color.PURPLE}
+    private static final Map<MotifStorage.Motif, Color[]> MOTIF_MAP = Map.of(
+            MotifStorage.Motif.PPG, new Color[]{Color.PURPLE, Color.PURPLE, Color.GREEN},
+            MotifStorage.Motif.PGP, new Color[]{Color.PURPLE, Color.GREEN, Color.PURPLE},
+            MotifStorage.Motif.GPP, new Color[]{Color.GREEN, Color.PURPLE, Color.PURPLE}
     );
 
     private double distance_threshold = 30.0; // TODO: Chack if sensor hits a hole on the artifact
 
     // ----------------------------------------- Util ------------------------------------------- //
-    private MotifStorage.MotifState motif;
+    private MotifStorage.Motif motif;
     private int[] shooting_order = {-1, -1, -1};
 
     private char[] names = {'F', 'C', 'R'};
 
     private Telemetry telemetry;
 
-    public Passthough(RobotMap robotMap, MotifStorage.MotifState motif) {
+    public Passthough(RobotMap robotMap, MotifStorage.Motif motif) {
         this.motif = motif;
 
         this.fingerF = robotMap.getFingerFrontServo();
@@ -104,7 +104,7 @@ public class Passthough extends SubsystemBase {
 
     @Override
     public void periodic() {
-        updateCurrentColors(); // TODO: REMOVE IF TOO MUCH I2C TRAFFIC
+//        updateCurrentColors(); // TODO: REMOVE IF TOO MUCH I2C TRAFFIC
 //        shootingOrderMotif(); // TODO: REMOVE IF TOO MUCH CALCULATION
 //
 //        colorSensorR.setGain(gain);

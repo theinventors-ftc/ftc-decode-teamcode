@@ -8,15 +8,14 @@ import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
 import com.arcrobotics.ftclib.command.WaitUntilCommand;
-import com.arcrobotics.ftclib.command.button.Trigger;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Drive.DriveConstants;
 import org.firstinspires.ftc.teamcode.Drive.MecanumDrive;
 import org.firstinspires.ftc.teamcode.Hardware.GamepadExEx;
-import org.firstinspires.ftc.teamcode.Hardware.IMUSubsystem;
 import org.firstinspires.ftc.teamcode.Hardware.PinpointYawWrapper;
+import org.firstinspires.ftc.teamcode.Mechanisms.Detection;
 import org.firstinspires.ftc.teamcode.Mechanisms.Intake;
 import org.firstinspires.ftc.teamcode.Mechanisms.Passthough;
 import org.firstinspires.ftc.teamcode.Mechanisms.Shooter;
@@ -48,11 +47,12 @@ public class DecodeRobot {
     protected Passthough passthough;
     public static int fingerBetween = 80, fingerHold = 340;
     protected Shooter shooter;
+    protected Detection detection;
 
-    protected MotifStorage.MotifState motif;
+    protected MotifStorage.Motif motif;
 
     public DecodeRobot(RobotMap robotMap, DriveConstants driveConstants, Alliance alliance,
-                       Pose pose, MotifStorage.MotifState motif
+                       Pose pose, MotifStorage.Motif motif
     ) {
         this.alliance = alliance;
         this.motif = motif;
@@ -140,7 +140,7 @@ public class DecodeRobot {
         return alliance;
     }
 
-    public MotifStorage.MotifState getMotif() {
+    public MotifStorage.Motif getMotif() {
         return motif;
     }
 
@@ -197,11 +197,11 @@ public class DecodeRobot {
         shooter = new Shooter(
             robotMap,
             this::getPose,
-            alliance,
-            telemetry
+            alliance
         );
+        detection = new Detection(robotMap);
 
-        driverOp.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whenPressed(new ConditionalCommand(
+        toolOp.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whenPressed(new ConditionalCommand(
                 new SequentialCommandGroup(
                         new InstantCommand(intake::intake, intake),
                         new InstantCommand(() -> passthough.setState(0, Passthough.FingerState.INTAKE), passthough),
@@ -217,7 +217,7 @@ public class DecodeRobot {
                 () -> intake.getState() != Intake.IntakeState.INTAKE
         ));
 
-        driverOp.getGamepadButton(GamepadKeys.Button.A).whenPressed((new ConditionalCommand(
+        toolOp.getGamepadButton(GamepadKeys.Button.A).whenPressed((new ConditionalCommand(
                 new SequentialCommandGroup(
                         new WaitUntilCommand(() -> shooter.wheelsAtSpeed()),
                         new InstantCommand(() -> passthough.setState(0, Passthough.FingerState.FEED), passthough),
@@ -228,7 +228,7 @@ public class DecodeRobot {
                 () -> shooter.turretInRange()
         )));
 
-        driverOp.getGamepadButton(GamepadKeys.Button.A).whenPressed((new ConditionalCommand(
+        toolOp.getGamepadButton(GamepadKeys.Button.B).whenPressed((new ConditionalCommand(
                 new SequentialCommandGroup(
                         new WaitUntilCommand(() -> shooter.wheelsAtSpeed()),
                         new InstantCommand(() -> passthough.setState(1, Passthough.FingerState.FEED), passthough),
@@ -239,7 +239,7 @@ public class DecodeRobot {
                 () -> shooter.turretInRange()
         )));
 
-        driverOp.getGamepadButton(GamepadKeys.Button.A).whenPressed((new ConditionalCommand(
+        toolOp.getGamepadButton(GamepadKeys.Button.Y).whenPressed((new ConditionalCommand(
                 new SequentialCommandGroup(
                         new WaitUntilCommand(() -> shooter.wheelsAtSpeed()),
                         new InstantCommand(() -> passthough.setState(2, Passthough.FingerState.FEED), passthough),
@@ -250,7 +250,7 @@ public class DecodeRobot {
                 () -> shooter.turretInRange()
         )));
 
-        driverOp.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).whenPressed(new ConditionalCommand(
+        toolOp.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).whenPressed(new ConditionalCommand(
                 new SequentialCommandGroup(
                         new WaitUntilCommand(() -> shooter.wheelsAtSpeed()),
                         new InstantCommand(() -> passthough.setState(0, Passthough.FingerState.FEED), passthough),
@@ -270,7 +270,7 @@ public class DecodeRobot {
                 () -> shooter.turretInRange()
         ));
 
-        driverOp.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(new ConditionalCommand(
+        toolOp.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(new ConditionalCommand(
                 new InstantCommand(shooter::enableWheels, shooter),
                 new InstantCommand(shooter::disableWheels, shooter),
                 () -> !shooter.areWheelsEnabled()
