@@ -198,33 +198,22 @@ public class PIDFEx {
         }
 
     public double calculate(double pv, double error) {
-        prevErrorVal_filtered = errorVal_p_filtered;
+//        prevErrorVal_filtered = error;
 
         double currentTimeStamp = (double) System.nanoTime() / 1E9;
         if (lastTimeStamp == 0) lastTimeStamp = currentTimeStamp;
         period = currentTimeStamp - lastTimeStamp;
         lastTimeStamp = currentTimeStamp;
 
-        if (measuredValue == pv) {
-            errorVal_p = error;
-        } else {
-            errorVal_p = error;
-            measuredValue = pv;
-        }
-
         errorVal_p_filtered = filter.get(error);
 
-        if (Math.abs(period) > 1E-6) {
-            errorVal_v = (errorVal_p_filtered - prevErrorVal_filtered) / period;
-        } else {
-            errorVal_v = 0;
-        }
+        errorVal_v = (error - prevErrorVal_filtered) / (period+0.00000000000000000000000000000000000000000000000000001);
 
             /*
             if total error is the integral from 0 to t of e(t')dt', and
             e(t) = sp - pv, then the total error, E(t), equals sp*t - pv*t.
              */
-        if (errorVal_p > -integralWorkingBounds && errorVal_p < integralWorkingBounds) {
+        if (error > -integralWorkingBounds && error < integralWorkingBounds) {
             totalError += period * error;
             totalError = totalError < minIntegral
                 ? minIntegral
@@ -234,8 +223,10 @@ public class PIDFEx {
             totalError = 0;
         }
 
+        prevErrorVal_filtered = error;
+
         // returns u(t)
-        return Math.abs(error) > deadzone ? kP * errorVal_p +
+        return Math.abs(error) > deadzone ? kP * error +
             kI * totalError + kD * errorVal_v + kF * setPoint : 0;
     }
 

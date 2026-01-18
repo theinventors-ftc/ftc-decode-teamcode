@@ -34,7 +34,7 @@ public class RobotMovement {
         ENGAGED
     }
 
-    private Type type = Type.DEFAULT;
+private Type type = Type.ENGAGED;
 
     /*-- Theta Interpolation --*/
     public enum ThetaInterpolation {

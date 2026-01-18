@@ -27,31 +27,31 @@ public class PIDTest extends CommandOpMode {
     private RobotMovement rm;
 
     public static double goal_x = 0, goal_y = 0, goal_theta = 0;
-    public static double thresh_x = 0.0, thresh_y = 0.0, thresh_theta = 0.0;
+    public static double thresh_x = 5.0, thresh_y = 5.0, thresh_theta = 10.0;
     public static double
         rotational_alpha = 0.0,
-        rotational_kPu = 0.0,
+        rotational_kPu = 0.028,
         rotational_kIu = 0.0,
-        rotational_kDu = 0.0,
-        rotational_kPl = 0.0,
-        rotational_kIl = 0.0,
-        rotational_kDl = 0.0;
+        rotational_kDu = 0.0018,
+        rotational_kPl = 0.04,
+        rotational_kIl = 0.17,
+        rotational_kDl = 0.0018;
     public static double
         parallel_alpha = 0.0,
-        parallel_kPu = 0.0,
+        parallel_kPu = 0.08,
         parallel_kIu = 0.0,
-        parallel_kDu = 0.0,
-        parallel_kPl = 0.0,
-        parallel_kIl = 0.0,
-        parallel_kDl = 0.0;
+        parallel_kDu = 0.014,
+        parallel_kPl = 0.17,
+        parallel_kIl = 0.15,
+        parallel_kDl = 0.025;
     public static double
         perpendicular_alpha = 0.0,
-        perpendicular_kPu = 0.0,
+        perpendicular_kPu = 0.35,
         perpendicular_kIu = 0.0,
-        perpendicular_kDu = 0.0,
-        perpendicular_kPl = 0.0,
-        perpendicular_kIl = 0.0,
-        perpendicular_kDl = 0.0;
+        perpendicular_kDu = 0.037,
+        perpendicular_kPl = 0.48,
+        perpendicular_kIl = 0.18,
+        perpendicular_kDl = 0.49;
 
     private Pose startingPose = new Pose(0,0,0);
     private Pose goal = new Pose(goal_x,goal_y,goal_theta);
@@ -184,10 +184,15 @@ public class PIDTest extends CommandOpMode {
 
         double realThetaEndDistance = getThetaError(goal.getTheta(), currentPose.getTheta());
 
-        Pose motorPowers = rm.goToPoint(rm.turnToRobotCentric(goal, currentPose), currentPose,
-                                        realPerpendicularEndDistance,
-                                        realParallelEndDistance,
-                                        realThetaEndDistance);
+//        Pose motorPowers = rm.goToPoint(rm.turnToRobotCentric(goal, currentPose), currentPose,
+//                                        realPerpendicularEndDistance,
+//                                        realParallelEndDistance,
+//                                        realThetaEndDistance);
+
+        Pose motorPowers = rm.goToPoint(goal, currentPose,
+                realPerpendicularEndDistance,
+                realParallelEndDistance,
+                realThetaEndDistance);
 
         RobotConstants.setUpperParallelPID(upperParallelPID);
         RobotConstants.setLowerParallelPID(lowerParallelPID);
