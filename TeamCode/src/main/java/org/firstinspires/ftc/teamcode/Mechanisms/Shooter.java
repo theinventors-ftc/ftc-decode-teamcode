@@ -17,6 +17,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.teamcode.Controllers.PIDFEx;
 import org.firstinspires.ftc.teamcode.Controllers.PIDFExCoeffs;
 import org.firstinspires.ftc.teamcode.Controllers.SigmoidPositionProfile;
+import org.firstinspires.ftc.teamcode.Controllers.StateMachine;
 import org.firstinspires.ftc.teamcode.DecodeRobot;
 import org.firstinspires.ftc.teamcode.Hardware.MotorExEx;
 import org.firstinspires.ftc.teamcode.PurePursuit.Base.Coordination.Pose;
@@ -43,7 +44,9 @@ public class Shooter extends SubsystemBase {
 
     // Turret
     private static final double TICKS_PER_FULL_ROTATION = 1916.0;
-    private static final double TURRET_MULTIPLIER = 1.0, MAX_TURRET_POWER = 0.9;
+    private static final double MAX_TURRET_POWER = 1.0;
+    private static final double MIN_TURRET_ANGLE = -91, MAX_TURRET_ANGLE = 203.0;
+
 
     public static double velo = 0.0, hood = 0.5;
 
@@ -64,9 +67,18 @@ public class Shooter extends SubsystemBase {
     private PIDFExCoeffs coeffsTurret, coeffsVelo;
     private SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(0, 1, 0);
 
+    // ------------------------------------ Turret Zeroing -------------------------------------- //
+    private boolean turretZeroed = false;
+    private double turretZeroPower = -0.4;
+    private double turretZeroCurrentThreshold = 3.6;
+    private double turretZeroOffset = 93.52;
+    private StateMachine hasStalled;
+
     // ------------------------------------------ Util ------------------------------------------ //
     private Telemetry telemetry;
     private DoubleSupplier voltage;
+
+    public static double kp = 0.04, ki = 0.14, kd = 0.002, kf = 0.0;
 
     public Shooter(RobotMap robotMap, Supplier<Pose> curPose, DecodeRobot.Alliance alliance) {
         this.wheel1 = robotMap.getShooterWheel1Motor();
@@ -78,6 +90,8 @@ public class Shooter extends SubsystemBase {
         turretMotor.resetEncoder();
         this.telemetry = robotMap.getTelemetry();
 
+        hasStalled = new StateMachine(() -> ((DcMotorEx)turretMotor.getRawMotor()).getCurrent(CurrentUnit.AMPS) > turretZeroCurrentThreshold, 400);
+
         wheel1.setZeroPowerBehavior(MotorExEx.ZeroPowerBehavior.FLOAT);
         wheel1.setInverted(true);
         wheel2.setZeroPowerBehavior(MotorExEx.ZeroPowerBehavior.FLOAT);
@@ -86,13 +100,13 @@ public class Shooter extends SubsystemBase {
         goalPose = (alliance == DecodeRobot.Alliance.RED) ? REDGoalPose : BLUEGoalPose;
 
         coeffsTurret = new PIDFExCoeffs(
-                0.024,
+                0.08,
                 0.14,
                 0.0012,
                 0.0,
                 0.1,
-                0.05,
-                10,
+                0.02,
+                15,
                 0.5
         );
         turretController = new PIDFEx(coeffsTurret);
@@ -155,6 +169,21 @@ public class Shooter extends SubsystemBase {
 
     @Override
     public void periodic() {
+        if(!turretZeroed) {
+            hasStalled.update();
+            turretMotor.set(turretZeroPower);
+            if(hasStalled.isJustActive()) {
+                turretMotor.resetEncoder();
+                turretMotor.set(0);
+                turretZeroed = true;
+            }
+            return;
+        }
+
+        turretController.setP(kp);
+        turretController.setI(ki);
+        turretController.setD(kd);
+        turretController.setF(kf);
 
         // ------------------------------------- Telemetry -------------------------------------- //
         telemetry.addData("[Shooter] Wheel State ", wheelsEnabled);
@@ -163,11 +192,9 @@ public class Shooter extends SubsystemBase {
         telemetry.addData("[Shooter] Turret Angle: ", getTurretAngle());
         telemetry.addData("[Shooter] Goal Dist: ", getDistanceToGoal());
         telemetry.addData("[Shooter] Goal Angle: ", getAngleToGoal());
-//        telemetry.addData("[Shooter] Motor Current (A): ", ((DcMotorEx)wheel1.getRawMotor()).getCurrent(CurrentUnit.AMPS));
-//        telemetry.addData("[Shooter] Motor Power (W): ", voltage.getAsDouble()*velo*((DcMotorEx)wheel1.getRawMotor()).getCurrent(CurrentUnit.AMPS));
 
         // --------------------------------------- Turret --------------------------------------- //
-        turretController.setSetPoint(Range.clip(getAngleToGoal(), -90, 225));
+        turretController.setSetPoint(Range.clip(getAngleToGoal(), MIN_TURRET_ANGLE, MAX_TURRET_ANGLE));
 
         turretMotor.set(Range.clip(
                 turretController.calculate(getTurretAngle()),
@@ -175,26 +202,18 @@ public class Shooter extends SubsystemBase {
                 MAX_TURRET_POWER
         ));
 
-        if(getDistanceToGoal() < 32.8 || getDistanceToGoal() > 164.77) return;
+        if(!inLUTRange()) return;
 
         // ---------------------------------------- Hood ---------------------------------------- //
         hoodServo.setPosition(Range.scale(
                 hoodAngle.get(getDistanceToGoal()), 0, 1, MIN_HOOD_POS, MAX_HOOD_POS)
         );
 
-//        hoodServo.setPosition(Range.scale(hood, 0, 1, MIN_HOOD_POS, MAX_HOOD_POS));
-
         // --------------------------------------- Wheels --------------------------------------- //
         if(wheelsEnabled) {
             wheel1.set(getControlledWheelPower(wheelSpeed.get(getDistanceToGoal())));
             wheel2.set(getControlledWheelPower(wheelSpeed.get(getDistanceToGoal())));
-//            wheel1.set(getControlledWheelPower(velo));
-//            wheel2.set(getControlledWheelPower(velo));
         }
-
-        FtcDashboard.getInstance().getTelemetry().addData("Target Velo: ", 0.9 * velo * MAX_TICKS_PER_S);
-        FtcDashboard.getInstance().getTelemetry().addData("Actual Velo: ", wheel1.getCorrectedVelocity());
-        FtcDashboard.getInstance().getTelemetry().update();
     }
 
     // ----------------------------------------- Wheels ----------------------------------------- //
@@ -213,6 +232,7 @@ public class Shooter extends SubsystemBase {
     public void disableWheels() {
         wheelsEnabled = false;
         wheel1.set(0);
+        wheel2.set(0);
     }
 
     public boolean areWheelsEnabled() {
@@ -225,7 +245,7 @@ public class Shooter extends SubsystemBase {
 
     // ----------------------------------------- Turret ----------------------------------------- //
     public double getTurretAngle() {
-        return (((turretMotor.getCurrentPosition())%TICKS_PER_FULL_ROTATION)*360.0/TICKS_PER_FULL_ROTATION)*(180.0/181.4);
+        return (((turretMotor.getCurrentPosition())%TICKS_PER_FULL_ROTATION)*360.0/TICKS_PER_FULL_ROTATION)*(180.0/181.4) - turretZeroOffset;
     }
 
     public boolean turretInRange() {
@@ -246,15 +266,28 @@ public class Shooter extends SubsystemBase {
     }
 
     public double getAngleToGoal() {
-        Pose pose = curPose.get();
-        double dx = goalPose.getX() - pose.getX();
-        double dy = goalPose.getY() - pose.getY();
-//        telemetry.addData("dx: ", dx);
-//        telemetry.addData("dy: ", dy);
-//        telemetry.addData("angle: ", Math.toDegrees(Math.atan2(dy, dx)));
-//        telemetry.addData("pose wrap angle: ", (pose.getTheta()%360));
-//        telemetry.addData("relative angle: ",  Math.toDegrees(Math.atan2(dy, dx)) - MathFunction.wrapDegrees(pose.getTheta()));
-        return Math.toDegrees(Math.atan2(dy, dx)) - (pose.getTheta()%360);
-//        return Math.toDegrees(Math.atan2(dy, dx)) - MathFunction.wrapDegrees(pose.getTheta());
+        double dx = goalPose.getX() - curPose.get().getX();
+        double dy = goalPose.getY() - curPose.get().getY();
+
+        double targetAngle = Math.toDegrees(Math.atan2(dy, dx));
+
+        double robotHeading = curPose.get().getTheta() % 360;
+        if (robotHeading >= 180) robotHeading -= 360;
+        if (robotHeading < -180) robotHeading += 360;
+
+        double relativeAngle = targetAngle - robotHeading;
+        relativeAngle %= 360;
+        if (relativeAngle >= 180) relativeAngle -= 360;
+        if (relativeAngle < -180) relativeAngle += 360;
+
+        if (relativeAngle < -95) relativeAngle = -95;
+        if (relativeAngle > 205) relativeAngle = 205;
+
+        return relativeAngle;
+    }
+
+    public boolean inLUTRange() {
+        double dist = getDistanceToGoal();
+        return dist > 32.8 && dist < 164.78;
     }
 }

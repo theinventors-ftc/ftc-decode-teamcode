@@ -12,7 +12,7 @@ import org.firstinspires.ftc.teamcode.Drive.DriveConstants;
 import org.firstinspires.ftc.teamcode.Hardware.GamepadExEx;
 import org.firstinspires.ftc.teamcode.PurePursuit.Base.Coordination.Pose;
 
-//@Disabled
+@Disabled
 @TeleOp(name = "Do not run this TeleOP", group = "")
 public class TeleOpBase extends CommandOpMode {
     GamepadExEx driverOp, toolOp;
@@ -42,8 +42,6 @@ public class TeleOpBase extends CommandOpMode {
         // ---------------------------- Transfer Pose from Autonomous --------------------------- //
 //        pose = PoseStorage.currentPose;
         pose = new Pose(0, 0, 90);
-
-        initAllianceRelated(DecodeRobot.Alliance.RED);
     }
 
     public void initAllianceRelated(DecodeRobot.Alliance alliance) {

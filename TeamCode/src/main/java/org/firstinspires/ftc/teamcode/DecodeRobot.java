@@ -225,7 +225,7 @@ public class DecodeRobot {
                         new InstantCommand(() -> passthough.setState(0, Passthough.FingerState.HOLD), passthough)
                 ),
                 new InstantCommand(),
-                () -> shooter.turretInRange()
+                () -> shooter.turretInRange() && shooter.inLUTRange()
         )));
 
         toolOp.getGamepadButton(GamepadKeys.Button.B).whenPressed((new ConditionalCommand(
@@ -236,7 +236,7 @@ public class DecodeRobot {
                         new InstantCommand(() -> passthough.setState(1, Passthough.FingerState.HOLD), passthough)
                 ),
                 new InstantCommand(),
-                () -> shooter.turretInRange()
+                () -> shooter.turretInRange() && shooter.inLUTRange()
         )));
 
         toolOp.getGamepadButton(GamepadKeys.Button.Y).whenPressed((new ConditionalCommand(
@@ -247,7 +247,7 @@ public class DecodeRobot {
                         new InstantCommand(() -> passthough.setState(2, Passthough.FingerState.HOLD), passthough)
                 ),
                 new InstantCommand(),
-                () -> shooter.turretInRange()
+                () -> shooter.turretInRange() && shooter.inLUTRange()
         )));
 
         toolOp.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).whenPressed(new ConditionalCommand(
@@ -267,7 +267,7 @@ public class DecodeRobot {
                         new WaitCommand(fingerBetween)
                 ),
                 new InstantCommand(),
-                () -> shooter.turretInRange()
+                () -> shooter.turretInRange() && shooter.inLUTRange()
         ));
 
         toolOp.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(new ConditionalCommand(
