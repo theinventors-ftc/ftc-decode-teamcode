@@ -45,7 +45,7 @@ public class Shooter extends SubsystemBase {
     // Turret
     private static final double TICKS_PER_FULL_ROTATION = 1916.0;
     private static final double MAX_TURRET_POWER = 1.0;
-    private static final double MIN_TURRET_ANGLE = -91, MAX_TURRET_ANGLE = 203.0;
+    private static final double MIN_TURRET_ANGLE = -93, MAX_TURRET_ANGLE = 203.0;
 
 
     public static double velo = 0.0, hood = 0.5;
@@ -71,14 +71,14 @@ public class Shooter extends SubsystemBase {
     private boolean turretZeroed = false;
     private double turretZeroPower = -0.4;
     private double turretZeroCurrentThreshold = 3.6;
-    private double turretZeroOffset = 93.52;
+    private double turretZeroOffset = 95.0;
     private StateMachine hasStalled;
 
     // ------------------------------------------ Util ------------------------------------------ //
     private Telemetry telemetry;
     private DoubleSupplier voltage;
 
-    public static double kp = 0.04, ki = 0.14, kd = 0.002, kf = 0.0;
+//    public static double kp = 0.04, ki = 0.14, kd = 0.002, kf = 0.0;
 
     public Shooter(RobotMap robotMap, Supplier<Pose> curPose, DecodeRobot.Alliance alliance) {
         this.wheel1 = robotMap.getShooterWheel1Motor();
@@ -100,9 +100,9 @@ public class Shooter extends SubsystemBase {
         goalPose = (alliance == DecodeRobot.Alliance.RED) ? REDGoalPose : BLUEGoalPose;
 
         coeffsTurret = new PIDFExCoeffs(
-                0.08,
-                0.14,
-                0.0012,
+                0.06,
+                0.1,
+                0.002,
                 0.0,
                 0.1,
                 0.02,
@@ -180,10 +180,10 @@ public class Shooter extends SubsystemBase {
             return;
         }
 
-        turretController.setP(kp);
-        turretController.setI(ki);
-        turretController.setD(kd);
-        turretController.setF(kf);
+//        turretController.setP(kp);
+//        turretController.setI(ki);
+//        turretController.setD(kd);
+//        turretController.setF(kf);
 
         // ------------------------------------- Telemetry -------------------------------------- //
         telemetry.addData("[Shooter] Wheel State ", wheelsEnabled);
@@ -195,6 +195,7 @@ public class Shooter extends SubsystemBase {
 
         // --------------------------------------- Turret --------------------------------------- //
         turretController.setSetPoint(Range.clip(getAngleToGoal(), MIN_TURRET_ANGLE, MAX_TURRET_ANGLE));
+//        turretController.setSetPoint(Range.clip(0, MIN_TURRET_ANGLE, MAX_TURRET_ANGLE));
 
         turretMotor.set(Range.clip(
                 turretController.calculate(getTurretAngle()),
@@ -289,5 +290,9 @@ public class Shooter extends SubsystemBase {
     public boolean inLUTRange() {
         double dist = getDistanceToGoal();
         return dist > 32.8 && dist < 164.78;
+    }
+
+    public void zeroTurret() {
+        turretZeroed = false;
     }
 }

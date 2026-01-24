@@ -21,7 +21,7 @@ public class TeleOpBase extends CommandOpMode {
     private DecodeRobot robot;
 
     private RobotMap robotMap;
-    private Pose pose = new Pose(0,0,0);
+    private Pose pose = new Pose(-72 + 8.375,8.5,0);
 
     @Override
     public void initialize() {
@@ -41,15 +41,17 @@ public class TeleOpBase extends CommandOpMode {
 
         // ---------------------------- Transfer Pose from Autonomous --------------------------- //
 //        pose = PoseStorage.currentPose;
-        pose = new Pose(0, 0, 90);
     }
 
     public void initAllianceRelated(DecodeRobot.Alliance alliance) {
+        if(alliance == DecodeRobot.Alliance.RED) {
+            pose = new Pose(-72 + 8.375, -8.5, 0);
+        }
         robot = new DecodeRobot(
             robotMap,
             RobotConstants,
             alliance,
-            new Pose(0, 0, 0),
+            pose,
             MotifStorage.currentMotif
         );
     }

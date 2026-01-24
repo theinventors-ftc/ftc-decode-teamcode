@@ -20,6 +20,7 @@ import org.firstinspires.ftc.teamcode.Mechanisms.Intake;
 import org.firstinspires.ftc.teamcode.Mechanisms.Passthough;
 import org.firstinspires.ftc.teamcode.Mechanisms.Shooter;
 import org.firstinspires.ftc.teamcode.PurePursuit.Base.Coordination.Pose;
+import org.firstinspires.ftc.teamcode.PurePursuit.Base.Coordination.Vector;
 import org.firstinspires.ftc.teamcode.PurePursuit.Base.Math.MathFunction;
 import org.firstinspires.ftc.teamcode.PurePursuit.HardwareRelated.Localization.PinpointLocalizer;
 
@@ -94,6 +95,8 @@ public class DecodeRobot {
 
         telemetry.addData("Pose", "X: %.2f, Y: %.2f, Theta: %.2f",
             getPose().getX(), getPose().getY(), getPose().getTheta());
+
+        telemetry.addData("Alliance: ", getAlliance());
 
         drive.drive(
             drivetrainStrafe(),
@@ -173,7 +176,7 @@ public class DecodeRobot {
 
         yawWrapper = new PinpointYawWrapper(
             robotMap,
-            () -> MathFunction.wrapDegrees(getPose().getTheta())
+            () -> (MathFunction.wrapDegrees(getPose().getTheta()) - (getAlliance() == Alliance.RED ? -90 : 90))
         );
         CommandScheduler.getInstance().registerSubsystem(yawWrapper);
 
@@ -199,7 +202,7 @@ public class DecodeRobot {
             this::getPose,
             alliance
         );
-        detection = new Detection(robotMap);
+//        detection = new Detection(robotMap);
 
         toolOp.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whenPressed(new ConditionalCommand(
                 new SequentialCommandGroup(
@@ -275,5 +278,30 @@ public class DecodeRobot {
                 new InstantCommand(shooter::disableWheels, shooter),
                 () -> !shooter.areWheelsEnabled()
         ));
+
+        toolOp.getGamepadButton(GamepadKeys.Button.START).whenPressed(
+                new InstantCommand(shooter::zeroTurret)
+        );
+
+        toolOp.getGamepadButton((GamepadKeys.Button.RIGHT_STICK_BUTTON)).whenPressed(
+                new InstantCommand(intake::reverse)
+        );
+
+        toolOp.getGamepadButton((GamepadKeys.Button.RIGHT_STICK_BUTTON)).whenReleased(
+                new InstantCommand(intake::stop)
+        );
+
+//        toolOp.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whenPressed(
+//                new InstantCommand(detection::setGoalPip)
+//        );
+
+        driverOp.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whenPressed(
+                new ConditionalCommand(
+                        new InstantCommand(() -> teleOpLocalizer.setVector(new Vector(-72 + 8.375, -72 + 8.5))),
+                        new InstantCommand(() -> teleOpLocalizer.setVector(new Vector(-72 + 8.375, 72 - 8.5))),
+                        () -> getAlliance() == Alliance.BLUE
+                )
+
+        );
     }
 }

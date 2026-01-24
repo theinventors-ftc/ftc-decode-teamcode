@@ -74,7 +74,7 @@ public class PinpointLocalizer {
     }
 
     public Pose getPose() {
-        return pinpointPose.get();
+        return pinpointPose;
     }
 
     public Pose getVelocity() {
@@ -89,6 +89,12 @@ public class PinpointLocalizer {
         odo.setPosition(new Pose(setPose.getX(), setPose.getX(), Math.toRadians(setPose.getTheta())));
         pinpointPose = setPose;
         previousHeading = setPose.getTheta();
+    }
+
+    public void setVector(Vector setVector) {
+        odo.setPosition(new Pose(setVector.getX(), setVector.getY(), Math.toRadians(pinpointPose.getTheta())));
+        pinpointPose = new Pose(setVector.getX(), setVector.getY(), Math.toRadians(pinpointPose.getTheta()));
+        previousHeading = Math.toRadians(pinpointPose.getTheta());
     }
 
     public void update() {
