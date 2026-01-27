@@ -106,9 +106,11 @@ public class DecodeRobot {
 
     public void drive_update(Pose pose) {
         drive.drive(
-            -pose.getY(),
+//            -pose.getY(),
+            0,
             pose.getX(),
             -pose.getTheta(),
+//            0,
             0,
             0
         );

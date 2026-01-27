@@ -176,23 +176,24 @@ public class PIDTest extends CommandOpMode {
         rm.updateLocalizer();
         Pose currentPose = rm.getCurrentPose();
 
-        double realTranslationalEndDistance = Math.hypot(goal.getX() - currentPose.getX(),
-                                                         goal.getY() - currentPose.getY());
+//        double realTranslationalEndDistance = Math.hypot(goal.getX() - currentPose.getX(),
+//                                                         goal.getY() - currentPose.getY());
 
         double realPerpendicularEndDistance = goal.getY() - currentPose.getY();
         double realParallelEndDistance = goal.getX() - currentPose.getX();
 
         double realThetaEndDistance = getThetaError(goal.getTheta(), currentPose.getTheta());
 
-//        Pose motorPowers = rm.goToPoint(rm.turnToRobotCentric(goal, currentPose), currentPose,
-//                                        realPerpendicularEndDistance,
-//                                        realParallelEndDistance,
-//                                        realThetaEndDistance);
+        Pose motorPowers = rm.goToPoint(rm.turnToRobotCentric(goal, currentPose, telemetry),
+                                        currentPose,
+                                        realPerpendicularEndDistance,
+                                        realParallelEndDistance,
+                                        realThetaEndDistance);
 
-        Pose motorPowers = rm.goToPoint(goal, currentPose,
-                realPerpendicularEndDistance,
-                realParallelEndDistance,
-                realThetaEndDistance);
+//        Pose motorPowers = rm.goToPoint(goal, currentPose,
+//                realPerpendicularEndDistance,
+//                realParallelEndDistance,
+//                realThetaEndDistance);
 
         RobotConstants.setUpperParallelPID(upperParallelPID);
         RobotConstants.setLowerParallelPID(lowerParallelPID);

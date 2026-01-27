@@ -7,6 +7,7 @@ import static java.lang.Math.abs;
 
 import com.qualcomm.robotcore.util.Range;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Controllers.PIDFEx;
 import org.firstinspires.ftc.teamcode.PurePursuit.Base.Coordination.Pose;
 import org.firstinspires.ftc.teamcode.PurePursuit.Base.Coordination.Vector;
@@ -357,19 +358,59 @@ private Type type = Type.ENGAGED;
         return finalTargetTheta;
     }
 
-    /*-- Util --*/
-    public Pose turnToRobotCentric(Pose pose, Pose currentPose) {
-        Pose fixedPose = new Pose(pose.getX(), pose.getY(), Math.atan2(pose.getX(), pose.getY()));
-
-        double fixedTheta = Math.toRadians(fixedPose.getTheta() - Math.toRadians(currentPose.getTheta()));
-
-        double rotX =
-            fixedPose.getX() * Math.cos(fixedTheta) - fixedPose.getY() * Math.sin(fixedTheta);
-        double rotY =
-            fixedPose.getX() * Math.sin(fixedTheta) + fixedPose.getY() * Math.cos(fixedTheta);
-
-        return new Pose(rotX, rotY, fixedTheta);
+    public static double norm(double angle) {
+        while (angle > Math.PI)  angle -= 2 * Math.PI;
+        while (angle < -Math.PI) angle += 2 * Math.PI;
+        return angle;
     }
+
+    /*-- Util --*/
+    public Pose turnToRobotCentric(Pose pose, Pose curPose, Telemetry tele) {
+                Pose fixedPose = new Pose(
+                    pose.getX(),
+                    pose.getY(),
+                    Math.atan2(
+                        pose.getX() - curPose.getX(),
+                        pose.getY() - curPose.getY()
+                    )
+                ); // inchs, inchs, rads
+
+                double fixedTheta = fixedPose.getTheta();
+
+                double rotX =
+                    fixedPose.getX() * Math.cos(fixedTheta) - fixedPose.getY() * Math.sin(fixedTheta);
+                double rotY =
+                    fixedPose.getX() * Math.sin(fixedTheta) + fixedPose.getY() * Math.cos(fixedTheta);
+
+                tele.addData("Rot X: ", rotX);
+                tele.addData("Rot Y: ", rotY);
+                tele.addData("fixed theta: ", Math.toDegrees(fixedTheta));
+
+                return new Pose(rotX, rotY, pose.getTheta());
+    }
+
+    public Pose turnToRobotCentric(Pose pose, Pose curPose) {
+        return new Pose(0, 0, 0);
+    }
+
+//    public Pose turnToRobotCentric(Pose pose, Pose currentPose, Telemetry tele) {
+//        // Field-centric error (target relative to robot)
+//        double dx = pose.getX() - currentPose.getX();
+//        double dy = pose.getY() - currentPose.getY();
+//
+//        // Robot heading (radians)
+//        double theta = currentPose.getTheta();
+//
+//        // Rotate field vector into robot frame
+//        double rotX =  dx * Math.cos(theta) + dy * Math.sin(theta);
+//        double rotY = -dx * Math.sin(theta) + dy * Math.cos(theta);
+//
+//        // Heading error (wrapped)
+//        double rotTheta = norm(pose.getTheta() - currentPose.getTheta());
+//
+//        return new Pose(rotX, rotY, Math.toDegrees(rotTheta));
+//    }
+
 
     public void breakFollowing() {
         isFinished = true;
