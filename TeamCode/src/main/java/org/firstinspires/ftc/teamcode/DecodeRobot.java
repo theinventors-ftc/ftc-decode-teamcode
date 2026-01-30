@@ -15,6 +15,7 @@ import org.firstinspires.ftc.teamcode.Drive.DriveConstants;
 import org.firstinspires.ftc.teamcode.Drive.MecanumDrive;
 import org.firstinspires.ftc.teamcode.Hardware.GamepadExEx;
 import org.firstinspires.ftc.teamcode.Hardware.PinpointYawWrapper;
+import org.firstinspires.ftc.teamcode.Mechanisms.CommandSeriesVault;
 import org.firstinspires.ftc.teamcode.Mechanisms.Detection;
 import org.firstinspires.ftc.teamcode.Mechanisms.Intake;
 import org.firstinspires.ftc.teamcode.Mechanisms.Passthough;
@@ -49,6 +50,7 @@ public class DecodeRobot {
     public static int fingerBetween = 80, fingerHold = 340;
     protected Shooter shooter;
     protected Detection detection;
+    protected CommandSeriesVault commandSeriesVault;
 
     protected MotifStorage.Motif motif;
 
@@ -204,78 +206,23 @@ public class DecodeRobot {
         );
 //        detection = new Detection(robotMap);
 
+        commandSeriesVault = new CommandSeriesVault(intake, passthough, shooter);
+
         toolOp.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whenPressed(new ConditionalCommand(
-                new SequentialCommandGroup(
-                        new InstantCommand(intake::intake, intake),
-                        new InstantCommand(() -> passthough.setState(0, Passthough.FingerState.INTAKE), passthough),
-                        new InstantCommand(() -> passthough.setState(1, Passthough.FingerState.INTAKE), passthough),
-                        new InstantCommand(() -> passthough.setState(2, Passthough.FingerState.INTAKE), passthough)
-                ),
-                new SequentialCommandGroup(
-                        new InstantCommand(intake::stop, intake),
-                        new InstantCommand(() -> passthough.setState(0, Passthough.FingerState.HOLD), passthough),
-                        new InstantCommand(() -> passthough.setState(1, Passthough.FingerState.HOLD), passthough),
-                        new InstantCommand(() -> passthough.setState(2, Passthough.FingerState.HOLD), passthough)
-                ),
+                commandSeriesVault.startIntakeProc(),
+                commandSeriesVault.stopIntakeProc(),
                 () -> intake.getState() != Intake.IntakeState.INTAKE
         ));
 
-        toolOp.getGamepadButton(GamepadKeys.Button.A).whenPressed((new ConditionalCommand(
-                new SequentialCommandGroup(
-                        new WaitUntilCommand(() -> shooter.wheelsAtSpeed()),
-                        new InstantCommand(() -> passthough.setState(0, Passthough.FingerState.FEED), passthough),
-                        new WaitCommand(fingerHold),
-                        new InstantCommand(() -> passthough.setState(0, Passthough.FingerState.HOLD), passthough)
-                ),
-                new InstantCommand(),
-                () -> shooter.turretInRange() && shooter.inLUTRange()
-        )));
+        toolOp.getGamepadButton(GamepadKeys.Button.A).whenPressed(commandSeriesVault.feedOneFinger(0));
+        toolOp.getGamepadButton(GamepadKeys.Button.B).whenPressed(commandSeriesVault.feedOneFinger(1));
+        toolOp.getGamepadButton(GamepadKeys.Button.Y).whenPressed(commandSeriesVault.feedOneFinger(2));
 
-        toolOp.getGamepadButton(GamepadKeys.Button.B).whenPressed((new ConditionalCommand(
-                new SequentialCommandGroup(
-                        new WaitUntilCommand(() -> shooter.wheelsAtSpeed()),
-                        new InstantCommand(() -> passthough.setState(1, Passthough.FingerState.FEED), passthough),
-                        new WaitCommand(fingerHold),
-                        new InstantCommand(() -> passthough.setState(1, Passthough.FingerState.HOLD), passthough)
-                ),
-                new InstantCommand(),
-                () -> shooter.turretInRange() && shooter.inLUTRange()
-        )));
-
-        toolOp.getGamepadButton(GamepadKeys.Button.Y).whenPressed((new ConditionalCommand(
-                new SequentialCommandGroup(
-                        new WaitUntilCommand(() -> shooter.wheelsAtSpeed()),
-                        new InstantCommand(() -> passthough.setState(2, Passthough.FingerState.FEED), passthough),
-                        new WaitCommand(fingerHold),
-                        new InstantCommand(() -> passthough.setState(2, Passthough.FingerState.HOLD), passthough)
-                ),
-                new InstantCommand(),
-                () -> shooter.turretInRange() && shooter.inLUTRange()
-        )));
-
-        toolOp.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).whenPressed(new ConditionalCommand(
-                new SequentialCommandGroup(
-                        new WaitUntilCommand(() -> shooter.wheelsAtSpeed()),
-                        new InstantCommand(() -> passthough.setState(0, Passthough.FingerState.FEED), passthough),
-                        new WaitCommand(fingerHold),
-                        new InstantCommand(() -> passthough.setState(0, Passthough.FingerState.HOLD), passthough),
-                        new WaitCommand(fingerBetween),
-                        new InstantCommand(() -> passthough.setState(1, Passthough.FingerState.FEED), passthough),
-                        new WaitCommand(fingerHold),
-                        new InstantCommand(() -> passthough.setState(1, Passthough.FingerState.HOLD), passthough),
-                        new WaitCommand(fingerBetween),
-                        new InstantCommand(() -> passthough.setState(2, Passthough.FingerState.FEED), passthough),
-                        new WaitCommand(fingerHold),
-                        new InstantCommand(() -> passthough.setState(2, Passthough.FingerState.HOLD), passthough),
-                        new WaitCommand(fingerBetween)
-                ),
-                new InstantCommand(),
-                () -> shooter.turretInRange() && shooter.inLUTRange()
-        ));
+        toolOp.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).whenPressed(commandSeriesVault.feedAllFingers());
 
         toolOp.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(new ConditionalCommand(
-                new InstantCommand(shooter::enableWheels, shooter),
-                new InstantCommand(shooter::disableWheels, shooter),
+                commandSeriesVault.enableWheels(),
+                commandSeriesVault.disableWheels(),
                 () -> !shooter.areWheelsEnabled()
         ));
 
@@ -284,11 +231,11 @@ public class DecodeRobot {
         );
 
         toolOp.getGamepadButton((GamepadKeys.Button.RIGHT_STICK_BUTTON)).whenPressed(
-                new InstantCommand(intake::reverse)
+                commandSeriesVault.reverseIntake()
         );
 
         toolOp.getGamepadButton((GamepadKeys.Button.RIGHT_STICK_BUTTON)).whenReleased(
-                new InstantCommand(intake::stop)
+                commandSeriesVault.stopIntake()
         );
 
 //        toolOp.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whenPressed(
@@ -301,7 +248,6 @@ public class DecodeRobot {
                         new InstantCommand(() -> teleOpLocalizer.setVector(new Vector(-72 + 8.375, 72 - 8.5))),
                         () -> getAlliance() == Alliance.BLUE
                 )
-
         );
     }
 }
