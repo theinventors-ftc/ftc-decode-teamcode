@@ -69,7 +69,7 @@ public class Shooter extends SubsystemBase {
 
     // ------------------------------------ Turret Zeroing -------------------------------------- //
     private boolean turretZeroed = false;
-    private double turretZeroPower = -0.4;
+    private double turretZeroPower = -0.3;
     private double turretZeroCurrentThreshold = 3.6;
     private double turretZeroOffset = 95.0;
     private StateMachine hasStalled;
@@ -78,9 +78,7 @@ public class Shooter extends SubsystemBase {
     private Telemetry telemetry;
     private DoubleSupplier voltage;
 
-//    public static double kp = 0.04, ki = 0.14, kd = 0.002, kf = 0.0;
-
-    public Shooter(RobotMap robotMap, Supplier<Pose> curPose, DecodeRobot.Alliance alliance) {
+    public Shooter(RobotMap robotMap, Supplier<Pose> curPose, DecodeRobot.Alliance alliance, boolean doZero) {
         this.wheel1 = robotMap.getShooterWheel1Motor();
 //        this.wheel2 = robotMap.getShooterWheel2Motor();
         this.wheel2 = robotMap.getIntakeRearMotor();
@@ -88,6 +86,7 @@ public class Shooter extends SubsystemBase {
         this.turretMotor = robotMap.getTurretMotor();
         turretMotor.setInverted(true);
         turretMotor.resetEncoder();
+        turretZeroed = !doZero;
         this.telemetry = robotMap.getTelemetry();
 
         hasStalled = new StateMachine(() -> ((DcMotorEx)turretMotor.getRawMotor()).getCurrent(CurrentUnit.AMPS) > turretZeroCurrentThreshold, 400);
@@ -180,22 +179,17 @@ public class Shooter extends SubsystemBase {
             return;
         }
 
-//        turretController.setP(kp);
-//        turretController.setI(ki);
-//        turretController.setD(kd);
-//        turretController.setF(kf);
-
         // ------------------------------------- Telemetry -------------------------------------- //
         telemetry.addData("[Shooter] Wheel State ", wheelsEnabled);
         telemetry.addData("[Shooter] Turret Lock ", turretLockEnabled);
         telemetry.addData("[Shooter] Hood Lock ", hoodLockEnabled);
+        telemetry.addData("[Shooter] Turret Ticks: ", turretMotor.getCurrentPosition());
         telemetry.addData("[Shooter] Turret Angle: ", getTurretAngle());
         telemetry.addData("[Shooter] Goal Dist: ", getDistanceToGoal());
         telemetry.addData("[Shooter] Goal Angle: ", getAngleToGoal());
 
         // --------------------------------------- Turret --------------------------------------- //
         turretController.setSetPoint(Range.clip(getAngleToGoal(), MIN_TURRET_ANGLE, MAX_TURRET_ANGLE));
-//        turretController.setSetPoint(Range.clip(0, MIN_TURRET_ANGLE, MAX_TURRET_ANGLE));
 
         turretMotor.set(Range.clip(
                 turretController.calculate(getTurretAngle()),

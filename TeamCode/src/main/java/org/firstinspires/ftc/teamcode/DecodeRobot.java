@@ -202,7 +202,8 @@ public class DecodeRobot {
         shooter = new Shooter(
             robotMap,
             this::getPose,
-            alliance
+            alliance,
+            true
         );
 //        detection = new Detection(robotMap);
 
@@ -214,11 +215,29 @@ public class DecodeRobot {
                 () -> intake.getState() != Intake.IntakeState.INTAKE
         ));
 
-        toolOp.getGamepadButton(GamepadKeys.Button.A).whenPressed(commandSeriesVault.feedOneFinger(0));
-        toolOp.getGamepadButton(GamepadKeys.Button.B).whenPressed(commandSeriesVault.feedOneFinger(1));
-        toolOp.getGamepadButton(GamepadKeys.Button.Y).whenPressed(commandSeriesVault.feedOneFinger(2));
+        toolOp.getGamepadButton(GamepadKeys.Button.A).whenPressed(new ConditionalCommand(
+                commandSeriesVault.feedOneFinger(0),
+                new InstantCommand(),
+                () -> shooter.turretInRange() && shooter.inLUTRange() && shooter.areWheelsEnabled()
+        ));
 
-        toolOp.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).whenPressed(commandSeriesVault.feedAllFingers());
+        toolOp.getGamepadButton(GamepadKeys.Button.B).whenPressed(new ConditionalCommand(
+                commandSeriesVault.feedOneFinger(1),
+                new InstantCommand(),
+                () -> shooter.turretInRange() && shooter.inLUTRange() && shooter.areWheelsEnabled()
+        ));
+
+        toolOp.getGamepadButton(GamepadKeys.Button.Y).whenPressed(new ConditionalCommand(
+                commandSeriesVault.feedOneFinger(2),
+                new InstantCommand(),
+                () -> shooter.turretInRange() && shooter.inLUTRange() && shooter.areWheelsEnabled()
+        ));
+
+        toolOp.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).whenPressed(new ConditionalCommand(
+                commandSeriesVault.feedAllFingers(),
+                new InstantCommand(),
+                () -> shooter.turretInRange() && shooter.inLUTRange() && shooter.areWheelsEnabled()
+        ));
 
         toolOp.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(new ConditionalCommand(
                 commandSeriesVault.enableWheels(),

@@ -23,38 +23,30 @@ public class CommandSeriesVault {
         this.shooter = shooter;
     }
 
-    public ConditionalCommand feedOneFinger(int fingerIdx) {
-        return new ConditionalCommand(
-                new SequentialCommandGroup(
-                        new WaitUntilCommand(() -> shooter.wheelsAtSpeed()),
-                        new InstantCommand(() -> passthough.setState(fingerIdx, Passthough.FingerState.FEED), passthough),
-                        new WaitCommand(FINGER_HOLD_MS),
-                        new InstantCommand(() -> passthough.setState(fingerIdx, Passthough.FingerState.HOLD), passthough)
-                ),
-                new InstantCommand(),
-                () -> shooter.turretInRange() && shooter.inLUTRange() && shooter.areWheelsEnabled()
+    public SequentialCommandGroup feedOneFinger(int fingerIdx) {
+        return new SequentialCommandGroup(
+                new WaitUntilCommand(() -> shooter.wheelsAtSpeed()),
+                new InstantCommand(() -> passthough.setState(fingerIdx, Passthough.FingerState.FEED), passthough),
+                new WaitCommand(FINGER_HOLD_MS),
+                new InstantCommand(() -> passthough.setState(fingerIdx, Passthough.FingerState.HOLD), passthough)
         );
     }
 
-    public ConditionalCommand feedAllFingers() {
-        return new ConditionalCommand(
-                new SequentialCommandGroup(
-                        new WaitUntilCommand(() -> shooter.wheelsAtSpeed()),
-                        new InstantCommand(() -> passthough.setState(0, Passthough.FingerState.FEED), passthough),
-                        new WaitCommand(FINGER_HOLD_MS),
-                        new InstantCommand(() -> passthough.setState(0, Passthough.FingerState.HOLD), passthough),
-                        new WaitCommand(FINGER_BETWEEN_MS),
-                        new InstantCommand(() -> passthough.setState(1, Passthough.FingerState.FEED), passthough),
-                        new WaitCommand(FINGER_HOLD_MS),
-                        new InstantCommand(() -> passthough.setState(1, Passthough.FingerState.HOLD), passthough),
-                        new WaitCommand(FINGER_BETWEEN_MS),
-                        new InstantCommand(() -> passthough.setState(2, Passthough.FingerState.FEED), passthough),
-                        new WaitCommand(FINGER_HOLD_MS),
-                        new InstantCommand(() -> passthough.setState(2, Passthough.FingerState.HOLD), passthough),
-                        new WaitCommand(FINGER_BETWEEN_MS)
-                ),
-                new InstantCommand(),
-                () -> shooter.turretInRange() && shooter.inLUTRange() && shooter.areWheelsEnabled()
+    public SequentialCommandGroup feedAllFingers() {
+        return new SequentialCommandGroup(
+                new WaitUntilCommand(() -> shooter.wheelsAtSpeed()),
+                new InstantCommand(() -> passthough.setState(0, Passthough.FingerState.FEED), passthough),
+                new WaitCommand(FINGER_HOLD_MS),
+                new InstantCommand(() -> passthough.setState(0, Passthough.FingerState.HOLD), passthough),
+                new WaitCommand(FINGER_BETWEEN_MS),
+                new InstantCommand(() -> passthough.setState(1, Passthough.FingerState.FEED), passthough),
+                new WaitCommand(FINGER_HOLD_MS),
+                new InstantCommand(() -> passthough.setState(1, Passthough.FingerState.HOLD), passthough),
+                new WaitCommand(FINGER_BETWEEN_MS),
+                new InstantCommand(() -> passthough.setState(2, Passthough.FingerState.FEED), passthough),
+                new WaitCommand(FINGER_HOLD_MS),
+                new InstantCommand(() -> passthough.setState(2, Passthough.FingerState.HOLD), passthough),
+                new WaitCommand(FINGER_BETWEEN_MS)
         );
     }
 
