@@ -50,6 +50,26 @@ public class CommandSeriesVault {
         );
     }
 
+    public SequentialCommandGroup rearrangeArtifacts() {
+        return new SequentialCommandGroup(
+                new InstantCommand(() -> passthough.setState(0, Passthough.FingerState.REARRANGE), passthough),
+                new InstantCommand(() -> passthough.setState(1, Passthough.FingerState.REARRANGE), passthough),
+                new InstantCommand(() -> passthough.setState(2, Passthough.FingerState.REARRANGE), passthough),
+                new WaitCommand(150),
+                new InstantCommand(() -> passthough.setState(0, Passthough.FingerState.HOLD), passthough),
+                new InstantCommand(() -> passthough.setState(1, Passthough.FingerState.HOLD), passthough),
+                new InstantCommand(() -> passthough.setState(2, Passthough.FingerState.HOLD), passthough),
+                new WaitCommand(150),
+                new InstantCommand(() -> passthough.setState(0, Passthough.FingerState.REARRANGE), passthough),
+                new InstantCommand(() -> passthough.setState(1, Passthough.FingerState.REARRANGE), passthough),
+                new InstantCommand(() -> passthough.setState(2, Passthough.FingerState.REARRANGE), passthough),
+                new WaitCommand(150),
+                new InstantCommand(() -> passthough.setState(0, Passthough.FingerState.HOLD), passthough),
+                new InstantCommand(() -> passthough.setState(1, Passthough.FingerState.HOLD), passthough),
+                new InstantCommand(() -> passthough.setState(2, Passthough.FingerState.HOLD), passthough)
+        );
+    }
+
     public InstantCommand enableWheels() {
         return new InstantCommand(() -> shooter.enableWheels(), shooter);
     }
@@ -81,6 +101,13 @@ public class CommandSeriesVault {
                 new InstantCommand(() -> passthough.setState(1, Passthough.FingerState.HOLD), passthough),
                 new InstantCommand(() -> passthough.setState(2, Passthough.FingerState.HOLD), passthough),
                 new InstantCommand(intake::stop, intake)
+        );
+    }
+
+    public SequentialCommandGroup autonomousWaitForTurret() {
+        return new SequentialCommandGroup(
+                new WaitUntilCommand(() -> shooter.turretAtGoal()),
+                new WaitUntilCommand(() -> shooter.wheelsAtSpeed())
         );
     }
 }

@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.AutoOPs;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.arcrobotics.ftclib.command.CommandOpMode;
@@ -8,9 +8,13 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.DecodeRobot;
 import org.firstinspires.ftc.teamcode.Drive.DriveConstants;
 import org.firstinspires.ftc.teamcode.Hardware.GamepadExEx;
+import org.firstinspires.ftc.teamcode.MotifStorage;
+import org.firstinspires.ftc.teamcode.PoseStorage;
 import org.firstinspires.ftc.teamcode.PurePursuit.Base.Coordination.Pose;
+import org.firstinspires.ftc.teamcode.RobotMap;
 
 @Disabled
 @TeleOp(name = "Do not run this TeleOP", group = "")
@@ -45,7 +49,8 @@ public class TeleOpBase extends CommandOpMode {
 
     public void initAllianceRelated(DecodeRobot.Alliance alliance) {
         if(alliance == DecodeRobot.Alliance.RED) {
-            pose = new Pose(-72 + 8.375, -8.5, 0);
+//            pose = new Pose(-72 + 8.375, -8.5, 0);
+            pose = new Pose(0.0, 0.0, 0.0);
         }
         robot = new DecodeRobot(
             robotMap,

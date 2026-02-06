@@ -14,16 +14,28 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 public class Constants {
+
     public static FollowerConstants followerConstants = new FollowerConstants()
             .mass(9)
             .lateralZeroPowerAcceleration(-33.60755547)
             .useSecondaryTranslationalPIDF(true)
             .useSecondaryHeadingPIDF(true)
             .useSecondaryDrivePIDF(true)
-            .translationalPIDFCoefficients(new PIDFCoefficients(0.11, 0.00005, 0.007, 0))
-            .secondaryTranslationalPIDFCoefficients(new PIDFCoefficients(0.25,0.00006,0.017,0))
+            .translationalPIDFCoefficients(new PIDFCoefficients(0.11, 0.00005, 0.012, 0))
+            .secondaryTranslationalPIDFCoefficients(new PIDFCoefficients(0.25,0.00006,0.075,0))
             .headingPIDFCoefficients(new PIDFCoefficients(1.8, 0, 0.002, 0.008))
             .secondaryHeadingPIDFCoefficients(new PIDFCoefficients(2,0.01,0.2,0));
+
+//    public static FollowerConstants followerConstants = new FollowerConstants()
+//            .mass(9)
+//            .lateralZeroPowerAcceleration(-33.60755547)
+//            .useSecondaryTranslationalPIDF(true)
+//            .useSecondaryHeadingPIDF(true)
+//            .useSecondaryDrivePIDF(true)
+//            .translationalPIDFCoefficients(new PIDFCoefficients(0.11, 0.00005, 0.007, 0))
+//            .secondaryTranslationalPIDFCoefficients(new PIDFCoefficients(0.25,0.00006,0.017,0))
+//            .headingPIDFCoefficients(new PIDFCoefficients(1.8, 0, 0.002, 0.008))
+//            .secondaryHeadingPIDFCoefficients(new PIDFCoefficients(2,0.01,0.2,0));
 
     public static MecanumConstants driveConstants = new MecanumConstants()
             .maxPower(1)

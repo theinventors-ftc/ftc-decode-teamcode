@@ -197,7 +197,7 @@ public class DecodeRobot {
 
         driverOp.getGamepadButton(GamepadKeys.Button.START).whenPressed(yawWrapper::resetYawValue);
 
-        intake = new Intake(robotMap, this::getHeading, this::drivetrainForward, this::drivetrainStrafe);
+        intake = new Intake(robotMap);
         passthough = new Passthough(robotMap, getMotif());
         shooter = new Shooter(
             robotMap,
@@ -255,6 +255,10 @@ public class DecodeRobot {
 
         toolOp.getGamepadButton((GamepadKeys.Button.RIGHT_STICK_BUTTON)).whenReleased(
                 commandSeriesVault.stopIntake()
+        );
+
+        toolOp.getGamepadButton(GamepadKeys.Button.LEFT_STICK_BUTTON).whenPressed(
+                commandSeriesVault.rearrangeArtifacts()
         );
 
 //        toolOp.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whenPressed(

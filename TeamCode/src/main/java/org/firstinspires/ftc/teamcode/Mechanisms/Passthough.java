@@ -28,12 +28,13 @@ public class Passthough extends SubsystemBase {
     public enum FingerState {
         INTAKE,
         HOLD,
-        FEED;
+        FEED,
+        REARRANGE;
 
         double[][] positions = {
-                {0.94, 0.97, 0.42}, // FRONT
-                {0.9, 0.93, 0.38}, // CENTER
-                {0.09, 0.04, 0.6}  // REAR
+                {0.94, 0.97, 0.42, 0.905}, // FRONT
+                {0.9, 0.93, 0.38, 0.878}, // CENTER
+                {0.09, 0.04, 0.6, 0.165}  // REAR
         };
 
         public double getPosition(int idx) {

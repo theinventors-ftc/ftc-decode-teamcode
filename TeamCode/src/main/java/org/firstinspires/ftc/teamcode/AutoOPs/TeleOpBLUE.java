@@ -1,6 +1,8 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.AutoOPs;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+
+import org.firstinspires.ftc.teamcode.DecodeRobot;
 
 @TeleOp(name = "TeleOP_BLUE", group = "")
 public class TeleOpBLUE extends TeleOpBase {

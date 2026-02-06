@@ -1,41 +1,26 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.AutoOPs;
 
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.CommandScheduler;
-import com.arcrobotics.ftclib.command.SequentialCommandGroup;
-import com.arcrobotics.ftclib.command.WaitCommand;
-import com.pedropathing.ftc.FTCCoordinates;
-import com.pedropathing.geometry.CoordinateSystem;
-import com.qualcomm.hardware.lynx.LynxModule;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.TelemetryManager;
 import com.bylazar.telemetry.PanelsTelemetry;
-
-import org.firstinspires.ftc.teamcode.Mechanisms.CommandSeriesVault;
-import org.firstinspires.ftc.teamcode.Mechanisms.Intake;
-import org.firstinspires.ftc.teamcode.Mechanisms.Passthough;
-import org.firstinspires.ftc.teamcode.Mechanisms.Shooter;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.paths.PathChain;
 import com.pedropathing.geometry.Pose;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
-@Autonomous(name = "AutonomousTest", group = "Autonomous")
+@Disabled
+@Autonomous(name = "-", group = "Autonomous")
 @Configurable
-public class TestAuto extends CommandOpMode {
+public class AutoTestOLD extends CommandOpMode {
     private TelemetryManager panelsTelemetry;
     public Follower follower;
-    private RobotMap robotMap;
 
-    private Intake intake;
-    private Passthough passthough;
-    private Shooter shooter;
-    private CommandSeriesVault commandVault;
-    private SequentialCommandGroup temp;
     private enum PathState {
         GOAL,
         INTAKE1,
@@ -56,7 +41,6 @@ public class TestAuto extends CommandOpMode {
     public void initialize() {
         CommandScheduler.getInstance().reset(); // Ultra SOS
         panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
-        robotMap = new RobotMap(hardwareMap, telemetry,null,null);
 
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(new Pose(107.6, 135, Math.toRadians(0)));
@@ -64,12 +48,6 @@ public class TestAuto extends CommandOpMode {
         paths = new Paths(follower);
 
         setPathState(PathState.GOAL);
-
-        intake = new Intake(robotMap,() -> 0, () -> 0, () -> 0);
-        passthough = new Passthough(robotMap, MotifStorage.Motif.PPG);
-        shooter = new Shooter(robotMap, this::getPoseFTCCoor, DecodeRobot.Alliance.RED, false);
-        commandVault = new CommandSeriesVault(intake, passthough, shooter);
-        commandVault.enableWheels().schedule();
 
         panelsTelemetry.debug("Status", "Initialized");
         panelsTelemetry.update(telemetry);
@@ -81,20 +59,12 @@ public class TestAuto extends CommandOpMode {
         autonomousPathUpdate();
         follower.update();
 
-        for (LynxModule hub : robotMap.getHubs()) hub.clearBulkCache();
-
         // Log values to Panels and Driver Station
 //        panelsTelemetry.debug("Path State", pathState);
-//        telemetry.addData("X", follower.getPose().getX());
-//        telemetry.addData("Y", follower.getPose().getY());
-//        telemetry.addData("Heading", follower.getPose().getHeading());
-//        telemetry.update();
-
-        telemetry.addData("X", getPoseFTCCoor().getX());
-        telemetry.addData("Y", getPoseFTCCoor().getY());
-        telemetry.addData("Heading", getPoseFTCCoor().getTheta());
-        telemetry.addData("PathState", pathState);
-        telemetry.update();
+        panelsTelemetry.debug("X", follower.getPose().getX());
+        panelsTelemetry.debug("Y", follower.getPose().getY());
+        panelsTelemetry.debug("Heading", follower.getPose().getHeading());
+        panelsTelemetry.update(telemetry);
     }
 
 
@@ -199,35 +169,14 @@ public class TestAuto extends CommandOpMode {
                 break;
 
             case INTAKE1:
-                if(!follower.atParametricEnd()) break;
-
-                if (!CommandScheduler.getInstance().isScheduled(temp)) {
-//                    temp = new SequentialCommandGroup(commandVault.feedAllFingers());
-                    temp = new SequentialCommandGroup(new WaitCommand(2000));
-                    temp.schedule();
+                if(!follower.isBusy()) {
+                    follower.followPath(paths.GoalToIntakeStack1);
+                    setPathState(PathState.LAUNCH1);
                 }
-
-                if(CommandScheduler.getInstance().isScheduled(temp)) break;
-
-                temp = commandVault.startIntakeProc();
-                temp.schedule();
-
-                follower.followPath(paths.GoalToIntakeStack1);
-                setPathState(PathState.LAUNCH1);
-
-//                if(!follower.isBusy() && temp.isFinished()) {
-//
-//                    temp = commandVault.startIntakeProc();
-//                    temp.schedule();
-//
-//                    follower.followPath(paths.GoalToIntakeStack1);
-//                    setPathState(PathState.LAUNCH1);
-//                }
                 break;
 
             case LAUNCH1:
                 if(!follower.isBusy()) {
-                    // Color Sensors
                     follower.followPath(paths.Intake1ToLauchArea1);
                     setPathState(PathState.AIM2);
                 }
@@ -235,16 +184,6 @@ public class TestAuto extends CommandOpMode {
 
             case AIM2:
                 if(!follower.isBusy()) {
-                    temp = new SequentialCommandGroup(
-                            commandVault.stopIntakeProc(),
-                            commandVault.feedAllFingers()
-                    );
-                    temp.schedule();
-                    if (!temp.isFinished()) break;
-
-                    temp = commandVault.startIntakeProc();
-                    temp.schedule();
-
                     follower.followPath(paths.LaunchArea1ToAimStack2);
                     setPathState(PathState.INTAKE2);
                 }
@@ -266,16 +205,6 @@ public class TestAuto extends CommandOpMode {
 
             case INTAKE3:
                 if(!follower.isBusy()) {
-                    temp = new SequentialCommandGroup(
-                            commandVault.stopIntakeProc(),
-                            commandVault.feedAllFingers()
-                    );
-                    temp.schedule();
-                    if (!temp.isFinished()) break;
-
-                    temp = commandVault.startIntakeProc();
-                    temp.schedule();
-
                     follower.followPath(paths.LauchArea2ToIntakeStack3);
                     setPathState(PathState.LAUNCHSMALL);
                 }
@@ -290,14 +219,6 @@ public class TestAuto extends CommandOpMode {
 
             case PARKING:
                 if(!follower.isBusy()) {
-                    temp = new SequentialCommandGroup(
-                            commandVault.stopIntakeProc(),
-                            commandVault.feedAllFingers()
-                    );
-                    temp.schedule();
-
-                    if (!temp.isFinished()) break;
-
                     follower.followPath(paths.SmallLaunchAreaToParking);
                     setPathState(PathState.patata);
                 }
@@ -313,19 +234,5 @@ public class TestAuto extends CommandOpMode {
 
     public void setPathState(PathState pState) {
         pathState = pState;
-    }
-
-    public org.firstinspires.ftc.teamcode.PurePursuit.Base.Coordination.Pose getPoseFTCCoor() {
-        Pose pedroPose = new Pose(
-                follower.getPose().getX(),
-                follower.getPose().getY(),
-                follower.getPose().getHeading()
-        ).getAsCoordinateSystem(FTCCoordinates.INSTANCE);
-
-        return new org.firstinspires.ftc.teamcode.PurePursuit.Base.Coordination.Pose(
-                pedroPose.getX(),
-                pedroPose.getY(),
-                Math.toDegrees(pedroPose.getHeading())
-        );
     }
 }

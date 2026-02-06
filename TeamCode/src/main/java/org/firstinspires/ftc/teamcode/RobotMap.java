@@ -24,9 +24,9 @@ public class RobotMap {
 
     private MotorExEx frontLeft, rearLeft, frontRight, rearRight;
 
-    private GoBildaPinpointDriver odo;
-    private GoBildaPinpointDriver.EncoderDirection strafeEncoderDirection, forwardEncoderDirection;
-    private GoBildaPinpointDriver.GoBildaOdometryPods encoderRes;
+    private GoBildaPinpointDriver odo = null;
+    private GoBildaPinpointDriver.EncoderDirection strafeEncoderDirection = null, forwardEncoderDirection = null;
+    private GoBildaPinpointDriver.GoBildaOdometryPods encoderRes = null;
 
 
     private List<LynxModule> hubs;
@@ -83,10 +83,12 @@ public class RobotMap {
         frontRight.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
 
         /*--Encoders--*/
-        odo = hm.get(GoBildaPinpointDriver.class, "odometry");
-        encoderRes = GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD;
-        forwardEncoderDirection = GoBildaPinpointDriver.EncoderDirection.FORWARD;
-        strafeEncoderDirection = GoBildaPinpointDriver.EncoderDirection.FORWARD;
+        if(driverOp != null || toolOp!=null) {
+            odo = hm.get(GoBildaPinpointDriver.class, "odometry");
+            encoderRes = GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD;
+            forwardEncoderDirection = GoBildaPinpointDriver.EncoderDirection.FORWARD;
+            strafeEncoderDirection = GoBildaPinpointDriver.EncoderDirection.FORWARD;
+        }
 
         /*--Util--*/
         for (LynxModule module : hubs) {
