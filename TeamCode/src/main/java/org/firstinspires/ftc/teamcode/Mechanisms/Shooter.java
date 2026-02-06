@@ -47,7 +47,7 @@ public class Shooter extends SubsystemBase {
     // Turret
     private static final double TICKS_PER_FULL_ROTATION = 1916.0;
     private static final double MAX_TURRET_POWER = 1.0;
-    private static final double MIN_TURRET_ANGLE = -93, MAX_TURRET_ANGLE = 203.0;
+    private static final double MIN_TURRET_ANGLE = -88, MAX_TURRET_ANGLE = 203.0; // 93
 
     // ----------------------------------------- States ----------------------------------------- //
     private boolean wheelsEnabled = false;
