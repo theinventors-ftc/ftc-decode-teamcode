@@ -31,9 +31,9 @@ import org.firstinspires.ftc.teamcode.pedroPathing.FollowerCommand;
 
 import java.util.ArrayList;
 
-@Autonomous(name = "RED_Allianca_Automatrone", group = "Autonomous")
+@Autonomous(name = "RED_12Ball_Classified", group = "Autonomous")
 @Configurable
-public class RED_Allianca_Automatrone extends CommandOpMode {
+public class RED_12Ball_Classified extends CommandOpMode {
     private TelemetryManager panelsTelemetry;
     public Follower follower;
     private RobotMap robotMap;
@@ -55,7 +55,7 @@ public class RED_Allianca_Automatrone extends CommandOpMode {
         robotMap = new RobotMap(hardwareMap, telemetry,null,null);
 
         follower = Constants.createFollower(hardwareMap);
-        follower.setStartingPose(new Pose(107.6, 135, Math.toRadians(180)));
+        follower.setStartingPose(new Pose(107.6, 135, Math.toRadians(0)));
         paths = new Paths(follower);
 
         intake = new Intake(robotMap);
@@ -73,49 +73,34 @@ public class RED_Allianca_Automatrone extends CommandOpMode {
         new SequentialCommandGroup(
                 new FollowerCommand(follower, paths.StartToGoal),
                 commandVault.autonomousWaitForTurret(),
-                new InstantCommand(shooter::cacheCurrentDistance),
                 commandVault.feedAllFingers(),
                 commandVault.startIntakeProc(),
-                new FollowerCommand(follower, paths.GoalToIntakeStack2),
-                new FollowerCommand(follower, paths.GoalToIntakeStack2_Deccel, 0.7),
+                new FollowerCommand(follower, paths.GoalToIntakeStack2, 0.4),
                 new WaitCommand(1000),
-                new ParallelCommandGroup(
-                        commandVault.rearrangeArtifacts(),
-                        new FollowerCommand(follower, paths.IntakeStack2ToLaunchArea2)
-                ),
+                new FollowerCommand(follower, paths.IntakeStack2ToOpenGate),
                 commandVault.stopIntakeProc(),
+                new WaitCommand(300),
+                new FollowerCommand(follower, paths.OpenGate2ToLaunchArea2),
                 commandVault.autonomousWaitForTurret(),
-                new WaitCommand(200),
-                new InstantCommand(shooter::cacheCurrentDistance),
+                new WaitCommand(300),
                 commandVault.feedAllFingers(),
                 commandVault.startIntakeProc(),
-                new FollowerCommand(follower, paths.LaunchArea2ToGate),
-                new FollowerCommand(follower, paths.GateCross),
-                new WaitCommand(1500),
-                new ParallelCommandGroup(
-                        commandVault.rearrangeArtifacts(),
-                        new FollowerCommand(follower, paths.GateToLaunch)
-                ),
+                new FollowerCommand(follower, paths.LauchArea2ToIntakeStack1, 0.4),
+                new WaitCommand(1000),
+                new FollowerCommand(follower, paths.Intake1ToLauchArea1),
                 commandVault.stopIntakeProc(),
-
                 commandVault.autonomousWaitForTurret(),
-                new WaitCommand(860),
-                new InstantCommand(shooter::cacheCurrentDistance),
+                new WaitCommand(300),
                 commandVault.feedAllFingers(),
                 commandVault.startIntakeProc(),
-                new FollowerCommand(follower, paths.LaunchToStack1, 0.65),
+                new FollowerCommand(follower, paths.LauchArea1ToIntakeStack3, 0.4),
                 new WaitCommand(1000),
-                new ParallelCommandGroup(
-                        commandVault.rearrangeArtifacts(),
-                        new FollowerCommand(follower, paths.Stack1ToLaunch)
-                ),
-                commandVault.stopIntakeProc(),
-
+                new FollowerCommand(follower, paths.IntakeStack3ToSmallLaunchArea),
                 commandVault.autonomousWaitForTurret(),
-                new WaitCommand(1000),
-                new InstantCommand(shooter::cacheCurrentDistance),
+                new WaitCommand(300),
                 commandVault.feedAllFingers(),
-                new FollowerCommand(follower, paths.Parking)
+                commandVault.stopIntakeProc(),
+                new FollowerCommand(follower, paths.SmallLaunchAreaToParking)
         ).schedule();
     }
 
@@ -147,106 +132,98 @@ public class RED_Allianca_Automatrone extends CommandOpMode {
         public PathChain
                 StartToGoal,
                 GoalToIntakeStack2,
-                IntakeStack2ToLaunchArea2,
-                GoalToIntakeStack2_Deccel,
-                LaunchArea2ToGate,
-                GateCross,
-                GateToLaunch,
-                LaunchToStack1,
-                Stack1ToLaunch,
-                Parking;
+                IntakeStack2ToOpenGate,
+                OpenGate2ToLaunchArea2,
+                LauchArea2ToIntakeStack1,
+                Intake1ToLauchArea1,
+                LauchArea1ToIntakeStack3,
+                IntakeStack3ToSmallLaunchArea,
+                SmallLaunchAreaToParking;
 
         public Paths(Follower follower) {
             StartToGoal = follower.pathBuilder().addPath(
                             new BezierLine(
                                     new Pose(107.6, 135.0),
-                                    new Pose(103.7, 120.7)
+                                    new Pose(87.7, 105.7)
                             )
-                    ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(260))
+                    ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(260))
                     .build();
 
             GoalToIntakeStack2 = follower.pathBuilder().addPath(
-                    new BezierCurve(
-                            new Pose(103.7, 120.7),
-                            new Pose(85.0, 80),
-                            new Pose(90, 60.5)
-                    )
-            ).setLinearHeadingInterpolation(Math.toRadians(260), Math.toRadians(0))
-            .build();
-
-            GoalToIntakeStack2_Deccel = follower.pathBuilder().addPath(
                             new BezierCurve(
-                                    new Pose(90, 60.5),
-                                    new Pose(95, 60),
-                                    new Pose(133.7, 60.5)
+                                    new Pose(87.7, 105.7),
+                                    new Pose(75.5, 70),
+                                    new Pose(70.0, 54),
+                                    new Pose(133.7, 59.5)
                             )
-                    ).setConstantHeadingInterpolation(0)
+                    ).setTangentHeadingInterpolation()
                     .setBrakingStrength(deccel_strength)
                     .build();
 
-            IntakeStack2ToLaunchArea2 = follower.pathBuilder().addPath(
+            IntakeStack2ToOpenGate = follower.pathBuilder().addPath(
                             new BezierCurve(
-                                    new Pose(133.7, 60.5),
-                                    new Pose(107.0, 55.8),
-                                    new Pose(84.0, 74.5)
+                                    new Pose(133.7, 59.5),
+                                    new Pose(115.0, 60),
+                                    new Pose(125.5, 65)
                             )
-                    ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(15))
-                    .build();
-
-            LaunchArea2ToGate = follower.pathBuilder().addPath(
-                            new BezierCurve(
-                                    new Pose(84.0, 74.5),
-                                    new Pose(95.0, 65),
-                                    new Pose(131, 63)
-                            )
-                    ).setLinearHeadingInterpolation(Math.toRadians(15), Math.toRadians(0))
+                    ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(270))
                     .setBrakingStrength(deccel_strength)
                     .build();
 
-            GateCross = follower.pathBuilder().addPath(
-                new BezierCurve(
-                        new Pose(131, 63),
-                        new Pose(120, 60),
-                        new Pose(132.5, 60)
-                )
-            ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(27))
-            .build();
+            OpenGate2ToLaunchArea2 = follower.pathBuilder().addPath(
+                            new BezierCurve(
+                                    new Pose(125, 68),
+                                    new Pose(95, 68),
+                                    new Pose(84.0, 83.5)
+                            )
+                    ).setLinearHeadingInterpolation(Math.toRadians(270), Math.toRadians(0))
+                    .build();
 
-            GateToLaunch = follower.pathBuilder().addPath(
+            LauchArea2ToIntakeStack1 = follower.pathBuilder().addPath(
                             new BezierLine(
-                                    new Pose(132.5, 60),
-                                    new Pose(84.0, 74.5)
-                            )
-                    ).setLinearHeadingInterpolation(Math.toRadians(27), Math.toRadians(0))
-                    .setTimeoutConstraint(300)
-                    .build();
-
-            LaunchToStack1 = follower.pathBuilder().addPath(
-                            new BezierCurve(
-                                    new Pose(84.0, 74.5),
-                                    new Pose(72, 87),
+                                    new Pose(84.0, 83.5),
                                     new Pose(123.0, 83.5)
                             )
-                    ).setConstantHeadingInterpolation(0)
+                    ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
                     .setBrakingStrength(deccel_strength)
                     .build();
 
-            Stack1ToLaunch = follower.pathBuilder().addPath(
-                        new BezierLine(
-                                new Pose(123.0, 83.5),
-                                new Pose(84.0, 74.5)
-                        )
-                ).setConstantHeadingInterpolation(0)
-                .setTimeoutConstraint(300)
-                .build();
+            Intake1ToLauchArea1 = follower.pathBuilder().addPath(
+                            new BezierLine(
+                                    new Pose(123.0, 83.5),
+                                    new Pose(86.0, 83.5)
+                            )
+                    ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(270))
+                    .build();
 
-            Parking = follower.pathBuilder().addPath(
-                    new BezierLine(
-                            new Pose(84.0, 74.5),
-                            new Pose(84.0, 50)
-                    )
-            ).setConstantHeadingInterpolation(0)
-            .build();
+            LauchArea1ToIntakeStack3 = follower.pathBuilder().addPath(
+                            new BezierCurve(
+                                    new Pose(86.0, 83.5),
+                                    new Pose(83.4, 36.1),
+                                    new Pose(98.7, 34),
+                                    new Pose(129.0, 35.6)
+                            )
+                    ).setTangentHeadingInterpolation()
+                    .setBrakingStrength(deccel_strength)
+                    .build();
+
+
+            IntakeStack3ToSmallLaunchArea = follower.pathBuilder().addPath(
+                            new BezierLine(
+                                    new Pose(129.0, 35.6),
+                                    new Pose(90.0, 15.5)
+                            )
+                    ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(25))
+                    .setTimeoutConstraint(600)
+                    .build();
+
+            SmallLaunchAreaToParking = follower.pathBuilder().addPath(
+                            new BezierLine(
+                                    new Pose(90.0, 15.5),
+                                    new Pose(100.0, 13.0)
+                            )
+                    ).setLinearHeadingInterpolation(Math.toRadians(25), Math.toRadians(0))
+                    .build();
         }
     }
 
