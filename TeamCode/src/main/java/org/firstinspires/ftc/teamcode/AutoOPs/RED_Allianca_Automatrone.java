@@ -89,7 +89,7 @@ public class RED_Allianca_Automatrone extends CommandOpMode {
                 new InstantCommand(shooter::cacheCurrentDistance),
                 commandVault.feedAllFingers(),
                 commandVault.startIntakeProc(),
-                new FollowerCommand(follower, paths.LaunchArea2ToGate),
+                new FollowerCommand(follower, paths.LaunchArea2ToGate, 0.7),
                 new FollowerCommand(follower, paths.GateCross),
                 new WaitCommand(1500),
                 new ParallelCommandGroup(
@@ -178,7 +178,7 @@ public class RED_Allianca_Automatrone extends CommandOpMode {
                             new BezierCurve(
                                     new Pose(90, 60.5),
                                     new Pose(95, 60),
-                                    new Pose(133.7, 60.5)
+                                    new Pose(129, 60.5)
                             )
                     ).setConstantHeadingInterpolation(0)
                     .setBrakingStrength(deccel_strength)
@@ -186,7 +186,7 @@ public class RED_Allianca_Automatrone extends CommandOpMode {
 
             IntakeStack2ToLaunchArea2 = follower.pathBuilder().addPath(
                             new BezierCurve(
-                                    new Pose(133.7, 60.5),
+                                    new Pose(129, 60.5),
                                     new Pose(107.0, 55.8),
                                     new Pose(84.0, 74.5)
                             )
@@ -197,7 +197,7 @@ public class RED_Allianca_Automatrone extends CommandOpMode {
                             new BezierCurve(
                                     new Pose(84.0, 74.5),
                                     new Pose(95.0, 65),
-                                    new Pose(131, 63)
+                                    new Pose(123, 66)
                             )
                     ).setLinearHeadingInterpolation(Math.toRadians(15), Math.toRadians(0))
                     .setBrakingStrength(deccel_strength)
@@ -205,16 +205,16 @@ public class RED_Allianca_Automatrone extends CommandOpMode {
 
             GateCross = follower.pathBuilder().addPath(
                 new BezierCurve(
-                        new Pose(131, 63),
-                        new Pose(120, 60),
-                        new Pose(132.5, 60)
+                        new Pose(123, 66),
+                        new Pose(110, 55),
+                        new Pose(128, 60)
                 )
             ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(27))
             .build();
 
             GateToLaunch = follower.pathBuilder().addPath(
                             new BezierLine(
-                                    new Pose(132.5, 60),
+                                    new Pose(128, 60),
                                     new Pose(84.0, 74.5)
                             )
                     ).setLinearHeadingInterpolation(Math.toRadians(27), Math.toRadians(0))
