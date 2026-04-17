@@ -200,7 +200,6 @@ public class Shooter extends SubsystemBase {
 
         // --------------------------------------- Turret --------------------------------------- //
         turretController.setSetPoint(Range.clip(getAngleToGoal(), MIN_TURRET_ANGLE, MAX_TURRET_ANGLE));
-//        turretController.setSetPoint(Range.clip(180, MIN_TURRET_ANGLE, MAX_TURRET_ANGLE));
 
         turretMotor.set(Range.clip(
                 turretController.calculate(getTurretAngle()),

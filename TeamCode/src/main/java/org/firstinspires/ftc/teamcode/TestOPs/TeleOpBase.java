@@ -42,9 +42,6 @@ public class TeleOpBase extends CommandOpMode {
 
         RobotConstants.DEFAULT_SPEED_PERC = 1.0;
         RobotConstants.SLOW_SPEED_PERC = 0.7;
-
-        // ---------------------------- Transfer Pose from Autonomous --------------------------- //
-//        pose = PoseStorage.currentPose;
     }
 
     public void initAllianceRelated(DecodeRobot.Alliance alliance) {
@@ -75,7 +72,5 @@ public class TeleOpBase extends CommandOpMode {
     @Override
     public void reset() {
         super.reset();
-        PoseStorage.currentPose = robot.getPose(); // In case we stop TeleOP midway
-        robotMap.getLimelight().close();
     }
 }

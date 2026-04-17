@@ -9,7 +9,9 @@ import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
 import com.arcrobotics.ftclib.command.WaitUntilCommand;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
+import com.qualcomm.robotcore.hardware.IMU;
 
+import org.firstinspires.ftc.robotcore.external.Supplier;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Drive.DriveConstants;
 import org.firstinspires.ftc.teamcode.Drive.MecanumDrive;
@@ -39,15 +41,12 @@ public class DecodeRobot {
 
     protected MecanumDrive drive = null;
     protected PinpointYawWrapper yawWrapper;
-
+    protected IMU imu;
     private boolean hasInit = false;
-
-    protected PinpointLocalizer teleOpLocalizer;
 
     // Mechanisms
     protected Intake intake;
     protected Passthough passthough;
-    public static int fingerBetween = 80, fingerHold = 340;
     protected Shooter shooter;
     protected Detection detection;
     protected CommandSeriesVault commandSeriesVault;
@@ -93,10 +92,7 @@ public class DecodeRobot {
     }
 
     public void drive_update() {
-        teleOpLocalizer.update();
-
-        telemetry.addData("Pose", "X: %.2f, Y: %.2f, Theta: %.2f",
-            getPose().getX(), getPose().getY(), getPose().getTheta());
+        telemetry.addData("Theta: ", "%.2f", getContinuousHeading());
 
         telemetry.addData("Alliance: ", getAlliance());
 
@@ -138,7 +134,7 @@ public class DecodeRobot {
     }
 
     public double getContinuousHeading() {
-        return yawWrapper.getContinuousYaw();
+        return imu.get;
     }
 
     public Alliance getAlliance() {
@@ -147,13 +143,6 @@ public class DecodeRobot {
 
     public MotifStorage.Motif getMotif() {
         return motif;
-    }
-
-    public Pose getPose() {
-        return teleOpLocalizer.getPose();
-    }
-    public Pose getPoseVelocity() {
-        return teleOpLocalizer.getVelocity();
     }
 
     /*-- Initializations --*/
@@ -174,14 +163,6 @@ public class DecodeRobot {
     }
 
     public void initTele(RobotMap robotMap, Pose startingPose) {
-        teleOpLocalizer = new PinpointLocalizer(robotMap, startingPose);
-
-        yawWrapper = new PinpointYawWrapper(
-            robotMap,
-            () -> (MathFunction.wrapDegrees(getPose().getTheta()) - (getAlliance() == Alliance.RED ? -90 : 90))
-        );
-        CommandScheduler.getInstance().registerSubsystem(yawWrapper);
-
         //- Gamepads
         this.driverOp = robotMap.getDriverOp();
         this.toolOp = robotMap.getToolOp();
@@ -195,17 +176,19 @@ public class DecodeRobot {
     public void initMechanismsTeleOp(RobotMap robotMap) {
         hasInit = true;
 
-        driverOp.getGamepadButton(GamepadKeys.Button.START).whenPressed(yawWrapper::resetYawValue);
-
         intake = new Intake(robotMap);
         passthough = new Passthough(robotMap, getMotif());
         shooter = new Shooter(
-            robotMap,
-            this::getPose,
-            alliance,
-            true
+                robotMap,
+                new Supplier<Pose>() {
+                    @Override
+                    public Pose get() {
+                        return new Pose(0, 0, 0);
+                    }
+                },
+                alliance,
+                true
         );
-//        detection = new Detection(robotMap);
 
         commandSeriesVault = new CommandSeriesVault(intake, passthough, shooter);
 
@@ -264,13 +247,5 @@ public class DecodeRobot {
 //        toolOp.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whenPressed(
 //                new InstantCommand(detection::setGoalPip)
 //        );
-
-        driverOp.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whenPressed(
-                new ConditionalCommand(
-                        new InstantCommand(() -> teleOpLocalizer.setVector(new Vector(-72 + 8.375, -72 + 8.5))),
-                        new InstantCommand(() -> teleOpLocalizer.setVector(new Vector(-72 + 8.375, 72 - 8.5))),
-                        () -> getAlliance() == Alliance.BLUE
-                )
-        );
     }
 }

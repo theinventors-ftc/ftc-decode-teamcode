@@ -83,19 +83,19 @@ public class RobotMap {
         frontRight.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
 
         /*--Encoders--*/
-        if(driverOp != null || toolOp!=null) {
-            odo = hm.get(GoBildaPinpointDriver.class, "odometry");
-            encoderRes = GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD;
-            forwardEncoderDirection = GoBildaPinpointDriver.EncoderDirection.FORWARD;
-            strafeEncoderDirection = GoBildaPinpointDriver.EncoderDirection.FORWARD;
-        }
+//        if(driverOp != null || toolOp!=null) {
+//            odo = hm.get(GoBildaPinpointDriver.class, "odometry");
+//            encoderRes = GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD;
+//            forwardEncoderDirection = GoBildaPinpointDriver.EncoderDirection.FORWARD;
+//            strafeEncoderDirection = GoBildaPinpointDriver.EncoderDirection.FORWARD;
+//        }
 
         /*--Util--*/
         for (LynxModule module : hubs) {
             module.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
         }
 
-        limelight = hm.get(Limelight3A.class, "limelight");
+//        limelight = hm.get(Limelight3A.class, "limelight");
 
         //// ----------------------------------- Mechanisms ----------------------------------- ////
         // Intake
@@ -106,12 +106,12 @@ public class RobotMap {
         fingerF = hm.get(ServoImplEx.class, "fingerF");
         fingerC = hm.get(ServoImplEx.class, "fingerC");
         fingerR = hm.get(ServoImplEx.class, "fingerR");
-        colorSensorF = new ColorSensor(hm, "colorSensorF");
-        colorSensorC = new ColorSensor(hm, "colorSensorC1");
-        colorSensorR = new ColorSensor(hm, "colorSensorR");
-        colorSensorF.setGain(75);
-        colorSensorC.setGain(40);
-        colorSensorR.setGain(75);
+//        colorSensorF = new ColorSensor(hm, "colorSensorF");
+//        colorSensorC = new ColorSensor(hm, "colorSensorC1");
+//        colorSensorR = new ColorSensor(hm, "colorSensorR");
+//        colorSensorF.setGain(75);
+//        colorSensorC.setGain(40);
+//        colorSensorR.setGain(75);
 
         // Shooter
         wheel1 = new MotorExEx(hm, "wheel1", Motor.GoBILDA.BARE);

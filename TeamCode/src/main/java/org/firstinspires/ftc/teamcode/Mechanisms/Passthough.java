@@ -16,10 +16,10 @@ import java.util.Map;
 public class Passthough extends SubsystemBase {
     // ---------------------------------------- Hardware ---------------------------------------- //
     private final ServoImplEx fingerF, fingerC, fingerR; // F: Front, C: Center, R: Rear
-    private ColorSensor colorSensorF, colorSensorC, colorSensorR; // F: Front, C: Center, R: Rear
+//    private ColorSensor colorSensorF, colorSensorC, colorSensorR; // F: Front, C: Center, R: Rear
 
     private final ServoImplEx[] fingers;
-    private final ColorSensor[] colorSensors;
+//    private final ColorSensor[] colorSensors;
 
     public static int gain = 50;
 
@@ -91,10 +91,10 @@ public class Passthough extends SubsystemBase {
         this.fingerR = robotMap.getFingerRearServo();
         fingers = new ServoImplEx[]{fingerF, fingerC, fingerR};
 
-        this.colorSensorF = robotMap.getColorSensorFront();
-        this.colorSensorC = robotMap.getColorSensorCenter();
-        this.colorSensorR = robotMap.getColorSensorRear();
-        colorSensors = new ColorSensor[]{colorSensorF, colorSensorC, colorSensorR};
+//        this.colorSensorF = robotMap.getColorSensorFront();
+//        this.colorSensorC = robotMap.getColorSensorCenter();
+//        this.colorSensorR = robotMap.getColorSensorRear();
+//        colorSensors = new ColorSensor[]{colorSensorF, colorSensorC, colorSensorR};
 
         this.telemetry = robotMap.getTelemetry();
 
@@ -113,9 +113,7 @@ public class Passthough extends SubsystemBase {
         telemetry.addData("[Passthough] FingerF State: ", getState(0));
         telemetry.addData("[Passthough] FingerC State: ", getState(1));
         telemetry.addData("[Passthough] FingerR State: ", getState(1));
-        telemetry.addData("[Passthough] ColorF: ", getCurrentColor(0));
-        telemetry.addData("[Passthough] ColorC: ", getCurrentColor(1));
-        telemetry.addData("[Passthough] ColorR: ", getCurrentColor(2));
+
         if(shooting_order[0] != -1) {
             telemetry.addData("[Passthough] Shooting Order:", "%c, %c, %c",
                     names[shooting_order[0]], names[shooting_order[1]], names[shooting_order[2]]);
@@ -134,71 +132,71 @@ public class Passthough extends SubsystemBase {
     }
 
     // ------------------------------------- Color Sensors -------------------------------------- //
-    private Color detectColor(int finger) {
-        double[] colors = colorSensors[finger].getRawColors();
-        double distance = colorSensors[finger].getDistance(DistanceUnit.MM);
+//    private Color detectColor(int finger) {
+//        double[] colors = colorSensors[finger].getRawColors();
+//        double distance = colorSensors[finger].getDistance(DistanceUnit.MM);
+//
+//        telemetry.addData("[Passthough] ", "Finger %d:  %.3f, %.3f, %.3f", finger, colors[0], colors[1], colors[2]);
+//        telemetry.addData("[Passthough] ", "Finger %d:  %.3f", finger, distance);
+//
+//        double minColorDistance = Double.MAX_VALUE;
+//        Color detectedColor = Color.NONE;
+//
+//        if(distance < distance_threshold) {
+//            for (Color color : Color.values()) {
+//                if (color == Color.NONE) continue;
+//                Double[] target = target_colors.get(color);
+//                double colorDistance = Math.sqrt(
+//                        Math.pow(colors[0] - target[0], 2) +
+//                        Math.pow(colors[1] - target[1], 2) +
+//                        Math.pow(colors[2] - target[2], 2)
+//                );
+//                if (colorDistance < minColorDistance) {
+//                    minColorDistance = colorDistance;
+//                    detectedColor = color;
+//                }
+//            }
+//
+//            return detectedColor;
+//        }
+//
+//        return detectedColor;
+//    }
 
-        telemetry.addData("[Passthough] ", "Finger %d:  %.3f, %.3f, %.3f", finger, colors[0], colors[1], colors[2]);
-        telemetry.addData("[Passthough] ", "Finger %d:  %.3f", finger, distance);
+//    public void updateCurrentColors() { // Call only when needed, minimize I2C traffic
+//        current_colors[0] = detectColor(0);
+//        current_colors[1] = detectColor(1);
+//        current_colors[2] = detectColor(2);
+//    }
 
-        double minColorDistance = Double.MAX_VALUE;
-        Color detectedColor = Color.NONE;
+//    public Color getCurrentColor(int finger) {
+//        return current_colors[finger];
+//    }
 
-        if(distance < distance_threshold) {
-            for (Color color : Color.values()) {
-                if (color == Color.NONE) continue;
-                Double[] target = target_colors.get(color);
-                double colorDistance = Math.sqrt(
-                        Math.pow(colors[0] - target[0], 2) +
-                        Math.pow(colors[1] - target[1], 2) +
-                        Math.pow(colors[2] - target[2], 2)
-                );
-                if (colorDistance < minColorDistance) {
-                    minColorDistance = colorDistance;
-                    detectedColor = color;
-                }
-            }
-
-            return detectedColor;
-        }
-
-        return detectedColor;
-    }
-
-    public void updateCurrentColors() { // Call only when needed, minimize I2C traffic
-        current_colors[0] = detectColor(0);
-        current_colors[1] = detectColor(1);
-        current_colors[2] = detectColor(2);
-    }
-
-    public Color getCurrentColor(int finger) {
-        return current_colors[finger];
-    }
-
-    public void shootingOrderMotif() {
-        this.shooting_order = new int[]{-1, -1, -1};
-
-        int purple_count = 0, green_count = 0;
-        for(Color color : current_colors) {
-            if(color == Color.PURPLE) purple_count++;
-            else if(color == Color.GREEN) green_count++;
-        }
-
-        if(purple_count != 2 || green_count != 1) return;
-
-        Color[] desired = MOTIF_MAP.get(motif);
-
-        boolean[] used = new boolean[3];
-
-        // Match desired colors to fingers
-        for (int i = 0; i < 3; i++) {
-            for (int finger = 0; finger < 3; finger++) {
-                if (!used[finger] && current_colors[finger] == desired[i]) {
-                    used[finger] = true;
-                    shooting_order[i] = finger + 0;
-                    break;
-                }
-            }
-        }
-    }
+//    public void shootingOrderMotif() {
+//        this.shooting_order = new int[]{-1, -1, -1};
+//
+//        int purple_count = 0, green_count = 0;
+//        for(Color color : current_colors) {
+//            if(color == Color.PURPLE) purple_count++;
+//            else if(color == Color.GREEN) green_count++;
+//        }
+//
+//        if(purple_count != 2 || green_count != 1) return;
+//
+//        Color[] desired = MOTIF_MAP.get(motif);
+//
+//        boolean[] used = new boolean[3];
+//
+//        // Match desired colors to fingers
+//        for (int i = 0; i < 3; i++) {
+//            for (int finger = 0; finger < 3; finger++) {
+//                if (!used[finger] && current_colors[finger] == desired[i]) {
+//                    used[finger] = true;
+//                    shooting_order[i] = finger + 0;
+//                    break;
+//                }
+//            }
+//        }
+//    }
 }
