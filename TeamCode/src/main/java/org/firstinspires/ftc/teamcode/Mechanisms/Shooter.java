@@ -80,7 +80,15 @@ public class Shooter extends SubsystemBase {
 
     public static double vel = 0.0, hoodVal = 0.0;
 
+    public Pose buttonPose = new Pose(0, 0, 0);
+
+    private DoubleSupplier headingSupplier;
+
     public Shooter(RobotMap robotMap, Supplier<Pose> curPose, DecodeRobot.Alliance alliance, boolean doZero) {
+        this(robotMap, curPose, alliance, doZero, () -> 0.0);
+    }
+
+    public Shooter(RobotMap robotMap, Supplier<Pose> curPose, DecodeRobot.Alliance alliance, boolean doZero, DoubleSupplier headingSupplier) {
         this.wheel1 = robotMap.getShooterWheel1Motor();
 //        this.wheel2 = robotMap.getShooterWheel2Motor();
         this.wheel2 = robotMap.getIntakeRearMotor();
@@ -89,8 +97,10 @@ public class Shooter extends SubsystemBase {
         turretMotor.setInverted(true);
         turretMotor.resetEncoder();
         turretZeroed = !doZero;
-        turretZeroed = true;
+//        turretZeroed = true;
         this.telemetry = robotMap.getTelemetry();
+
+        this.headingSupplier = headingSupplier;
 
         hasStalled = new StateMachine(() -> ((DcMotorEx)turretMotor.getRawMotor()).getCurrent(CurrentUnit.AMPS) > turretZeroCurrentThreshold, 400);
 
@@ -102,9 +112,9 @@ public class Shooter extends SubsystemBase {
         goalPose = (alliance == DecodeRobot.Alliance.RED) ? REDGoalPose : BLUEGoalPose;
 
         coeffsTurret = new PIDFExCoeffs(
-                0.06,
+                0.05,
                 0.1,
-                0.002,
+                0.0018,
                 0.0,
                 0.1,
                 0.02,
@@ -125,7 +135,7 @@ public class Shooter extends SubsystemBase {
         );
         veloController = new PIDFEx(coeffsVelo);
 
-        this.curPose = curPose;
+        this.curPose = curPose == null ? () -> buttonPose : curPose;
 
         // Initialize LUTs here
         wheelSpeed = new InterpLUT();
@@ -219,8 +229,8 @@ public class Shooter extends SubsystemBase {
 
         // --------------------------------------- Wheels --------------------------------------- //
         if(wheelsEnabled) {
-            wheel1.set(getControlledWheelPower(wheelSpeed.get(getDistanceToGoal())));
-            wheel2.set(getControlledWheelPower(wheelSpeed.get(getDistanceToGoal())));
+            wheel1.set(getControlledWheelPower(wheelSpeed.get(getDistanceToGoal())*0.99));
+            wheel2.set(getControlledWheelPower(wheelSpeed.get(getDistanceToGoal())*0.99));
 //            wheel1.set(vel);
 //            wheel2.set(vel);
         }
@@ -290,7 +300,8 @@ public class Shooter extends SubsystemBase {
 
         double targetAngle = Math.toDegrees(Math.atan2(dy, dx));
 
-        double robotHeading = curPose.get().getTheta() % 360;
+        double robotHeading = headingSupplier.getAsDouble() % 360;
+
         if (robotHeading >= 180) robotHeading -= 360;
         if (robotHeading < -180) robotHeading += 360;
 
@@ -312,5 +323,9 @@ public class Shooter extends SubsystemBase {
 
     public void zeroTurret() {
         turretZeroed = false;
+    }
+
+    public void setButtonPose(Pose pose) {
+        buttonPose = pose;
     }
 }

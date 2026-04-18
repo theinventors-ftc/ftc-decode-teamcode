@@ -3,12 +3,15 @@ package org.firstinspires.ftc.teamcode;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.lynx.LynxModule;
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.ServoImplEx;
 
+import org.firstinspires.ftc.ftccommon.internal.manualcontrol.parameters.ImuParameters;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.teamcode.Hardware.Battery;
 import org.firstinspires.ftc.teamcode.Hardware.ColorSensor;
 import org.firstinspires.ftc.teamcode.Hardware.GamepadExEx;
@@ -27,6 +30,8 @@ public class RobotMap {
     private GoBildaPinpointDriver odo = null;
     private GoBildaPinpointDriver.EncoderDirection strafeEncoderDirection = null, forwardEncoderDirection = null;
     private GoBildaPinpointDriver.GoBildaOdometryPods encoderRes = null;
+
+    private IMU imu;
 
 
     private List<LynxModule> hubs;
@@ -61,7 +66,7 @@ public class RobotMap {
         this.telemetry.setMsTransmissionInterval(11);
 
         if(driverOp != null) this.driverOp = new GamepadExEx(driverOp);
-        if(toolOp != null) this.toolOp = new GamepadExEx(toolOp);
+        if(toolOp != null) this.toolOp = new GamepadExEx(driverOp);
 
         hubs = hm.getAll(LynxModule.class);
         battery = new Battery(hm);
@@ -81,6 +86,13 @@ public class RobotMap {
         rearLeft.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
         rearRight.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
         frontRight.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
+
+        RevHubOrientationOnRobot.LogoFacingDirection logoDirection = RevHubOrientationOnRobot.LogoFacingDirection.LEFT;
+        RevHubOrientationOnRobot.UsbFacingDirection  usbDirection  = RevHubOrientationOnRobot.UsbFacingDirection.UP;
+        RevHubOrientationOnRobot orientationOnRobot = new RevHubOrientationOnRobot(logoDirection, usbDirection);
+
+        imu = hm.get(IMU.class, "imu");
+        imu.initialize(new IMU.Parameters(orientationOnRobot));
 
         /*--Encoders--*/
 //        if(driverOp != null || toolOp!=null) {
@@ -181,7 +193,7 @@ public class RobotMap {
 
     // ------------------------------------------ IMU ------------------------------------------- //
     public IMU getIMU() {
-        return null;
+        return imu;
     }
 
     //// ------------------------------------- Mechanisms ------------------------------------- ////

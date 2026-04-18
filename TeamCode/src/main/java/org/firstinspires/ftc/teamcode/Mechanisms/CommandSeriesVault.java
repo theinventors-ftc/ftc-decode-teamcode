@@ -7,6 +7,7 @@ import com.arcrobotics.ftclib.command.WaitCommand;
 import com.arcrobotics.ftclib.command.WaitUntilCommand;
 
 import org.firstinspires.ftc.teamcode.DecodeRobot;
+import org.firstinspires.ftc.teamcode.PurePursuit.Base.Coordination.Pose;
 
 public class CommandSeriesVault {
     private DecodeRobot.Alliance alliance;
@@ -32,9 +33,10 @@ public class CommandSeriesVault {
         );
     }
 
-    public SequentialCommandGroup feedAllFingers() {
+    public SequentialCommandGroup feedAllFingers(Pose targetPose) {
         return new SequentialCommandGroup(
                 new WaitUntilCommand(() -> shooter.wheelsAtSpeed()),
+                targetPose != null ? new InstantCommand(() -> shooter.setButtonPose(targetPose), shooter) : new InstantCommand(),
                 new InstantCommand(() -> passthough.setState(0, Passthough.FingerState.FEED), passthough),
                 new WaitCommand(FINGER_HOLD_MS),
                 new InstantCommand(() -> passthough.setState(0, Passthough.FingerState.HOLD), passthough),
@@ -48,6 +50,10 @@ public class CommandSeriesVault {
                 new InstantCommand(() -> passthough.setState(2, Passthough.FingerState.HOLD), passthough),
                 new WaitCommand(FINGER_BETWEEN_MS)
         );
+    }
+
+    public SequentialCommandGroup feedAllFingers() {
+        return feedAllFingers(null);
     }
 
     public SequentialCommandGroup rearrangeArtifacts() {
@@ -108,6 +114,22 @@ public class CommandSeriesVault {
         return new SequentialCommandGroup(
                 new WaitUntilCommand(() -> shooter.turretAtGoal()),
                 new WaitUntilCommand(() -> shooter.wheelsAtSpeed())
+        );
+    }
+
+    public SequentialCommandGroup flickFrontFinger() {
+        return new SequentialCommandGroup(
+                new InstantCommand(() -> passthough.setState(0, Passthough.FingerState.REARRANGE), passthough),
+                new WaitCommand(80),
+                new InstantCommand(() -> passthough.setState(0, Passthough.FingerState.HOLD), passthough)
+        );
+    }
+
+    public SequentialCommandGroup flickRearFinger() {
+        return new SequentialCommandGroup(
+                new InstantCommand(() -> passthough.setState(2, Passthough.FingerState.REARRANGE), passthough),
+                new WaitCommand(80),
+                new InstantCommand(() -> passthough.setState(2, Passthough.FingerState.HOLD), passthough)
         );
     }
 }

@@ -33,14 +33,6 @@ public class IMUSubsystem extends SubsystemBase {
         this.telemetry = robotMap.getTelemetry();
     }
 
-    public IMUSubsystem(RobotMap robotMap, DoubleSupplier pinpoint) {
-        pinpoint_yaw = pinpoint;
-        timer = new Timer(0);
-        timer.start();
-
-        this.telemetry = robotMap.getTelemetry();
-    }
-
     public void periodic() {
         in_time = timer.elapsedTime();
 

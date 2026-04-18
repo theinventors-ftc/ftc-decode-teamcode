@@ -16,6 +16,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Drive.DriveConstants;
 import org.firstinspires.ftc.teamcode.Drive.MecanumDrive;
 import org.firstinspires.ftc.teamcode.Hardware.GamepadExEx;
+import org.firstinspires.ftc.teamcode.Hardware.IMUSubsystem;
 import org.firstinspires.ftc.teamcode.Hardware.PinpointYawWrapper;
 import org.firstinspires.ftc.teamcode.Mechanisms.CommandSeriesVault;
 import org.firstinspires.ftc.teamcode.Mechanisms.Detection;
@@ -40,15 +41,13 @@ public class DecodeRobot {
     protected Telemetry telemetry;
 
     protected MecanumDrive drive = null;
-    protected PinpointYawWrapper yawWrapper;
-    protected IMU imu;
+    protected IMUSubsystem imuSubsystem;
     private boolean hasInit = false;
 
     // Mechanisms
     protected Intake intake;
     protected Passthough passthough;
     protected Shooter shooter;
-    protected Detection detection;
     protected CommandSeriesVault commandSeriesVault;
 
     protected MotifStorage.Motif motif;
@@ -93,14 +92,13 @@ public class DecodeRobot {
 
     public void drive_update() {
         telemetry.addData("Theta: ", "%.2f", getContinuousHeading());
-
         telemetry.addData("Alliance: ", getAlliance());
 
         drive.drive(
             drivetrainStrafe(),
             drivetrainForward(),
             drivetrainTurn(),
-            getHeading(),
+            getHeading() - (alliance == Alliance.RED ? -90 : 90),
             driverOp.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER)
         );
     }
@@ -130,11 +128,11 @@ public class DecodeRobot {
 
     /*-- Getters --*/
     public double getHeading() {
-        return yawWrapper.getRawYaw();
+        return imuSubsystem.getRawYaw();
     }
 
     public double getContinuousHeading() {
-        return imu.get;
+        return imuSubsystem.getYaw();
     }
 
     public Alliance getAlliance() {
@@ -166,6 +164,8 @@ public class DecodeRobot {
         //- Gamepads
         this.driverOp = robotMap.getDriverOp();
         this.toolOp = robotMap.getToolOp();
+
+        imuSubsystem = new IMUSubsystem(robotMap, 0);
     }
 
     /*-- Mechanisms Initialization --*/
@@ -180,14 +180,10 @@ public class DecodeRobot {
         passthough = new Passthough(robotMap, getMotif());
         shooter = new Shooter(
                 robotMap,
-                new Supplier<Pose>() {
-                    @Override
-                    public Pose get() {
-                        return new Pose(0, 0, 0);
-                    }
-                },
+                null,
                 alliance,
-                true
+                true,
+                this::getContinuousHeading
         );
 
         commandSeriesVault = new CommandSeriesVault(intake, passthough, shooter);
@@ -199,38 +195,28 @@ public class DecodeRobot {
         ));
 
         toolOp.getGamepadButton(GamepadKeys.Button.A).whenPressed(new ConditionalCommand(
-                commandSeriesVault.feedOneFinger(0),
+                commandSeriesVault.feedAllFingers(new Pose(48, 0, 0)),
                 new InstantCommand(),
                 () -> shooter.turretInRange() && shooter.inLUTRange() && shooter.areWheelsEnabled()
         ));
 
         toolOp.getGamepadButton(GamepadKeys.Button.B).whenPressed(new ConditionalCommand(
-                commandSeriesVault.feedOneFinger(1),
+                commandSeriesVault.feedAllFingers(new Pose(0, 0, 0)),
                 new InstantCommand(),
                 () -> shooter.turretInRange() && shooter.inLUTRange() && shooter.areWheelsEnabled()
         ));
 
         toolOp.getGamepadButton(GamepadKeys.Button.Y).whenPressed(new ConditionalCommand(
-                commandSeriesVault.feedOneFinger(2),
+                commandSeriesVault.feedAllFingers(new Pose(-48, 0, 0)),
                 new InstantCommand(),
                 () -> shooter.turretInRange() && shooter.inLUTRange() && shooter.areWheelsEnabled()
         ));
 
-        toolOp.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).whenPressed(new ConditionalCommand(
-                commandSeriesVault.feedAllFingers(),
-                new InstantCommand(),
-                () -> shooter.turretInRange() && shooter.inLUTRange() && shooter.areWheelsEnabled()
-        ));
-
-        toolOp.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(new ConditionalCommand(
+        toolOp.getGamepadButton(GamepadKeys.Button.X).whenPressed(new ConditionalCommand(
                 commandSeriesVault.enableWheels(),
                 commandSeriesVault.disableWheels(),
                 () -> !shooter.areWheelsEnabled()
         ));
-
-        toolOp.getGamepadButton(GamepadKeys.Button.START).whenPressed(
-                new InstantCommand(shooter::zeroTurret)
-        );
 
         toolOp.getGamepadButton((GamepadKeys.Button.RIGHT_STICK_BUTTON)).whenPressed(
                 commandSeriesVault.reverseIntake()
@@ -244,8 +230,12 @@ public class DecodeRobot {
                 commandSeriesVault.rearrangeArtifacts()
         );
 
-//        toolOp.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whenPressed(
-//                new InstantCommand(detection::setGoalPip)
-//        );
+        toolOp.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(
+                commandSeriesVault.flickFrontFinger()
+        );
+
+        toolOp.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whenPressed(
+                commandSeriesVault.flickRearFinger()
+        );
     }
 }
